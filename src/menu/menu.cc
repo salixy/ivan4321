@@ -444,12 +444,12 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
         ImDrawList* draw_list = ImGui::GetForegroundDrawList( );
         int const a_255 = ( int )( 255.0f * tabs_alpha );
 
-        // Draw Left Overlay Panel Back Arrow Button
-        ImVec2 const back_icon_pos = ImVec2( panel_x + 22.0f, panel_y + 22.0f );
-        ImVec2 const back_icon_size = ImVec2( 24.0f, 24.0f );
+        // Draw Back Arrow Button in bottom-right corner of the window
+        ImVec2 const back_icon_size = ImVec2( 28.0f, 28.0f );
+        ImVec2 const back_icon_pos = ImVec2( m_pos.x + m_size.x - back_icon_size.x - 24.0f, m_pos.y + m_size.y - back_icon_size.y - 24.0f );
 
         bool const is_back_hovered = ( mouse_pos.x >= back_icon_pos.x && mouse_pos.x <= back_icon_pos.x + back_icon_size.x &&
-                                      mouse_pos.y >= back_icon_pos.y && mouse_pos.y <= back_icon_size.y + back_icon_pos.y );
+                                      mouse_pos.y >= back_icon_pos.y && mouse_pos.y <= back_icon_pos.y + back_icon_size.y );
 
         m_anim_back_hover.m_speed = 18.0f;
         m_anim_back_hover.set( is_back_hovered ? 1.0f : 0.0f );
@@ -464,10 +464,10 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
         );
 
         // Vector back arrow (<-)
-        ImVec2 const b_center = ImVec2( back_icon_pos.x + 12.0f, back_icon_pos.y + 12.0f );
-        draw_list->AddLine( ImVec2( b_center.x + 5.0f, b_center.y ), ImVec2( b_center.x - 4.0f, b_center.y ), back_icon_col, 2.2f );
-        draw_list->AddLine( ImVec2( b_center.x - 4.0f, b_center.y ), ImVec2( b_center.x - 1.0f, b_center.y - 4.0f ), back_icon_col, 2.2f );
-        draw_list->AddLine( ImVec2( b_center.x - 4.0f, b_center.y ), ImVec2( b_center.x - 1.0f, b_center.y + 4.0f ), back_icon_col, 2.2f );
+        ImVec2 const b_center = ImVec2( back_icon_pos.x + back_icon_size.x * 0.5f, back_icon_pos.y + back_icon_size.y * 0.5f );
+        draw_list->AddLine( ImVec2( b_center.x + 6.0f, b_center.y ), ImVec2( b_center.x - 5.0f, b_center.y ), back_icon_col, 2.4f );
+        draw_list->AddLine( ImVec2( b_center.x - 5.0f, b_center.y ), ImVec2( b_center.x - 1.0f, b_center.y - 5.0f ), back_icon_col, 2.4f );
+        draw_list->AddLine( ImVec2( b_center.x - 5.0f, b_center.y ), ImVec2( b_center.x - 1.0f, b_center.y + 5.0f ), back_icon_col, 2.4f );
 
         if ( is_back_hovered && io.MouseClicked[ 0 ] && m_state == menu_state_t::MAIN_DASHBOARD )
         {
