@@ -42,15 +42,15 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
 
     float const tab_start_y = panel_pos.y + 60.0f;
     float const tab_w = 270.0f;
-    float const tab_h = 40.0f;
+    float const tab_h = 52.0f;
 
     // Smooth horizontal entrance and exit slide animation for left tab menu & subtabs (right-to-left)
     float const item_slide_x = ( 1.0f - alpha ) * 35.0f;
     float const tab_x = panel_pos.x + 20.0f + item_slide_x;
 
-    float const sub_tab_h = 36.0f;
+    float const sub_tab_h = 48.0f;
     float const sub_tab_spacing = 4.0f;
-    float const total_sub_unit_h = sub_tab_h + sub_tab_spacing; // 40.0f unified height step
+    float const total_sub_unit_h = sub_tab_h + sub_tab_spacing; // 52.0f unified height step
     float const sub_w = 236.0f;
     float const sub_x = panel_pos.x + 40.0f + item_slide_x;
 
