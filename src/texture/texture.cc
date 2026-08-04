@@ -91,19 +91,6 @@ bool c_texture::load_from_file( char const* filename )
         }
     }
 
-    // Convert logo texture RGB to pure white (255, 255, 255) while preserving alpha mask
-    if ( strstr( filename, "logo" ) != nullptr )
-    {
-        int const pixel_count = width * height;
-        for ( int i = 0; i < pixel_count; ++i )
-        {
-            unsigned char* p = &data[ i * 4 ];
-            p[ 0 ] = 255;
-            p[ 1 ] = 255;
-            p[ 2 ] = 255;
-        }
-    }
-
     GLuint texture_id = 0;
     glGenTextures( 1, &texture_id );
     glBindTexture( GL_TEXTURE_2D, texture_id );
