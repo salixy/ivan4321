@@ -218,18 +218,10 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
         float const h_val = m_anim_tab_hover[ i ].m_value;
         float const a_val = m_anim_tab_active[ i ].m_value;
 
-        // Clean, minimal parent tab styling without heavy boxes or borders
-        if ( h_val > 0.001f && !is_selected )
-        {
-            int const hover_bg_a = ( int )( h_val * 18.0f * alpha );
-            draw_list->AddRectFilled( tab_min, tab_max, IM_COL32( 255, 255, 255, hover_bg_a ), 8.0f );
-        }
-
         // Text & icon color for parent tab: smoothly transition to accent color when active
-        float const h_subtle = h_val * 0.50f;
-        int const r_col = ( int )lerp_f( lerp_f( 105.0f, 230.0f, h_subtle ), 158.0f, a_val );
-        int const g_col = ( int )lerp_f( lerp_f( 105.0f, 230.0f, h_subtle ), 149.0f, a_val );
-        int const b_col = ( int )lerp_f( lerp_f( 118.0f, 240.0f, h_subtle ), 217.0f, a_val );
+        int const r_col = ( int )lerp_f( 105.0f, 158.0f, a_val );
+        int const g_col = ( int )lerp_f( 105.0f, 149.0f, a_val );
+        int const b_col = ( int )lerp_f( 118.0f, 217.0f, a_val );
         ImU32 const item_col = IM_COL32( r_col, g_col, b_col, a_255 );
 
         if ( icon_font != nullptr )
@@ -281,28 +273,17 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
                 ImVec2 const sub_min = ImVec2( sub_x, cur_sub_y );
                 ImVec2 const sub_max = ImVec2( sub_x + sub_w, cur_sub_y + sub_tab_h );
 
-                bool const is_this_sub_hovered = ( expand_val > 0.85f ) &&
-                                                 ( mouse_pos.x >= sub_min.x && mouse_pos.x <= sub_max.x &&
-                                                   mouse_pos.y >= sub_min.y && mouse_pos.y <= sub_max.y );
-
                 bool const is_sub_selected = ( is_selected && selected_sub == j );
-
-                m_anim_sub_hover[ i ][ j ].m_speed = 14.0f;
-                m_anim_sub_hover[ i ][ j ].set( is_this_sub_hovered ? 1.0f : 0.0f );
-                m_anim_sub_hover[ i ][ j ].update( delta_time );
-
-                float const sub_h_val = m_anim_sub_hover[ i ][ j ].m_value;
                 float const sub_alpha = alpha * ( is_selected ? std::clamp( smoothed_expand * 1.15f, 0.0f, 1.0f ) : ( m_active_tab >= 0 ? 0.0f : std::clamp( smoothed_expand * 1.15f, 0.0f, 1.0f ) ) );
 
                 if ( sub_alpha > 0.001f )
                 {
                     int const sub_a255 = ( int )( 255.0f * sub_alpha );
 
-                    // Sub-tab text color: accent color when active, hover glow when hovered
-                    float const sub_h_glow = sub_h_val * 0.60f;
-                    float const target_r = is_sub_selected ? 158.0f : lerp_f( 95.0f, 220.0f, sub_h_glow );
-                    float const target_g = is_sub_selected ? 149.0f : lerp_f( 95.0f, 220.0f, sub_h_glow );
-                    float const target_b = is_sub_selected ? 217.0f : lerp_f( 108.0f, 235.0f, sub_h_glow );
+                    // Sub-tab text color: accent color when active
+                    float const target_r = is_sub_selected ? 158.0f : 95.0f;
+                    float const target_g = is_sub_selected ? 149.0f : 95.0f;
+                    float const target_b = is_sub_selected ? 217.0f : 108.0f;
 
                     ImU32 const sub_txt_col = IM_COL32( ( int )target_r, ( int )target_g, ( int )target_b, sub_a255 );
 
