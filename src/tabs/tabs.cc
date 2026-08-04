@@ -225,23 +225,11 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
             draw_list->AddRectFilled( tab_min, tab_max, IM_COL32( 255, 255, 255, hover_bg_a ), 8.0f );
         }
 
-        if ( a_val > 0.001f )
-        {
-            // Subtle left accent bar for active parent tab
-            float const bar_h = 20.0f * a_val;
-            float const bar_cy = tab_min.y + tab_h * 0.5f;
-
-            ImVec2 const bar_min = ImVec2( tab_min.x + 2.0f, bar_cy - bar_h * 0.5f );
-            ImVec2 const bar_max = ImVec2( tab_min.x + 5.0f, bar_cy + bar_h * 0.5f );
-
-            draw_list->AddRectFilled( bar_min, bar_max, IM_COL32( 0x7A, 0x72, 0xAC, ( int )( a_val * 255.0f * alpha ) ), 1.5f );
-        }
-
-        // Crisp clean text & icon color for parent tab
-        float const text_glow = std::clamp( a_val * 1.0f + ( 1.0f - a_val ) * h_val * 0.50f, 0.0f, 1.0f );
-        int const r_col = ( int )lerp_f( 105.0f, 255.0f, text_glow );
-        int const g_col = ( int )lerp_f( 105.0f, 255.0f, text_glow );
-        int const b_col = ( int )lerp_f( 118.0f, 255.0f, text_glow );
+        // Text & icon color for parent tab: smoothly transition to accent color when active
+        float const h_subtle = h_val * 0.50f;
+        int const r_col = ( int )lerp_f( lerp_f( 105.0f, 230.0f, h_subtle ), 158.0f, a_val );
+        int const g_col = ( int )lerp_f( lerp_f( 105.0f, 230.0f, h_subtle ), 149.0f, a_val );
+        int const b_col = ( int )lerp_f( lerp_f( 118.0f, 240.0f, h_subtle ), 217.0f, a_val );
         ImU32 const item_col = IM_COL32( r_col, g_col, b_col, a_255 );
 
         if ( icon_font != nullptr )
@@ -259,7 +247,7 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
 
         current_y += tab_h;
 
-        // Render sub-tabs with smooth clipped accordion container & clean minimal gliding indicator
+        // Render sub-tabs with smooth clipped accordion container
         if ( expand_val > 0.001f )
         {
             float const sub_start_y = current_y + 4.0f;
@@ -278,8 +266,6 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
             m_anim_sub_bullet_rel_y[ i ].set( ( float )selected_sub );
             m_anim_sub_bullet_rel_y[ i ].update( delta_time );
 
-            float const curr_slot_float = m_anim_sub_bullet_rel_y[ i ].m_value;
-
             // Push subtab container clip rect to smoothly uncover subtabs during expansion without overlaps
             ImVec2 const sub_clip_min = ImVec2( panel_pos.x + 15.0f, sub_start_y - 2.0f );
             ImVec2 const sub_clip_max = ImVec2( sub_x + sub_w + 10.0f, sub_start_y + anim_container_h );
@@ -287,17 +273,6 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
             draw_list->PushClipRect( sub_clip_min, sub_clip_max, true );
 
             float const float_offset = 0.0f;
-
-            // Minimal clean gliding left indicator line for active sub-tab
-            float const glide_sub_y = sub_start_y + curr_slot_float * total_sub_unit_h + float_offset;
-            float const pill_alpha = alpha * ( is_selected ? std::clamp( smoothed_expand * 1.2f, 0.0f, 1.0f ) : 0.0f );
-            if ( pill_alpha > 0.001f )
-            {
-                int const bar_a = ( int )( pill_alpha * 255.0f );
-                ImVec2 const bar_min = ImVec2( sub_x + 4.0f, glide_sub_y + 8.0f );
-                ImVec2 const bar_max = ImVec2( sub_x + 7.0f, glide_sub_y + sub_tab_h - 8.0f );
-                draw_list->AddRectFilled( bar_min, bar_max, IM_COL32( 0x7A, 0x72, 0xAC, bar_a ), 1.5f );
-            }
 
             for ( int j = 0; j < sub_count; ++j )
             {
@@ -323,12 +298,13 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
                 {
                     int const sub_a255 = ( int )( 255.0f * sub_alpha );
 
-                    // Crisp, clean sub-tab text color without visual noise
-                    float const sub_text_glow = std::clamp( is_sub_selected ? 1.0f : ( 0.45f + sub_h_val * 0.35f ), 0.0f, 1.0f );
-                    int const r_sub_txt = ( int )lerp_f( 95.0f, 255.0f, sub_text_glow );
-                    int const g_sub_txt = ( int )lerp_f( 95.0f, 255.0f, sub_text_glow );
-                    int const b_sub_txt = ( int )lerp_f( 108.0f, 255.0f, sub_text_glow );
-                    ImU32 const sub_txt_col = IM_COL32( r_sub_txt, g_sub_txt, b_sub_txt, sub_a255 );
+                    // Sub-tab text color: accent color when active, hover glow when hovered
+                    float const sub_h_glow = sub_h_val * 0.60f;
+                    float const target_r = is_sub_selected ? 158.0f : lerp_f( 95.0f, 220.0f, sub_h_glow );
+                    float const target_g = is_sub_selected ? 149.0f : lerp_f( 95.0f, 220.0f, sub_h_glow );
+                    float const target_b = is_sub_selected ? 217.0f : lerp_f( 108.0f, 235.0f, sub_h_glow );
+
+                    ImU32 const sub_txt_col = IM_COL32( ( int )target_r, ( int )target_g, ( int )target_b, sub_a255 );
 
                     if ( font_medium_32 != nullptr )
                     {
