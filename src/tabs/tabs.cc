@@ -1,5 +1,6 @@
 #include "tabs/tabs.hxx"
 #include "motion/motion.hxx"
+#include "texture/texture.hxx"
 
 #include <algorithm>
 #include <cmath>
@@ -11,7 +12,7 @@ static inline float lerp_f( float a, float b, float t )
     return a + ( b - a ) * t;
 }
 
-void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const panel_h, float const alpha, float const delta_time, bool const can_interact, ImFont* font_medium_32, ImFont* icon_font )
+void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const panel_h, float const alpha, float const delta_time, bool const can_interact, ImFont* font_medium_32, ImFont* icon_font, c_texture const* logo_texture )
 {
     if ( alpha <= 0.001f || panel_w <= 1.0f )
     {
@@ -40,12 +41,29 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
         { "Configs",  "\xef\x83\x87", 2, { { "Manager" }, { "Transfer" } } }
     };
 
-    float const tab_start_y = panel_pos.y + 20.0f;
+    // Smooth horizontal entrance and exit slide animation for left tab menu & subtabs (right-to-left)
+    float const item_slide_x = ( 1.0f - alpha ) * 35.0f;
+
+    // Draw logo above tabs if provided
+    float logo_h_offset = 0.0f;
+    if ( logo_texture != nullptr && logo_texture->m_loaded )
+    {
+        ImVec2 const logo_min = ImVec2( panel_pos.x + 20.0f + item_slide_x, panel_pos.y + 20.0f );
+        ImVec2 const logo_max = ImVec2( logo_min.x + 68.0f, logo_min.y + 44.0f );
+
+        draw_list->AddImage(
+            ( ImTextureID )( intptr_t )logo_texture->m_texture_id,
+            logo_min, logo_max,
+            ImVec2( 0.0f, 0.0f ), ImVec2( 1.0f, 1.0f ),
+            IM_COL32( 255, 255, 255, a_255 )
+        );
+        logo_h_offset = 64.0f;
+    }
+
+    float const tab_start_y = panel_pos.y + 20.0f + logo_h_offset;
     float const tab_w = 225.0f;
     float const tab_h = 52.0f;
 
-    // Smooth horizontal entrance and exit slide animation for left tab menu & subtabs (right-to-left)
-    float const item_slide_x = ( 1.0f - alpha ) * 35.0f;
     float const tab_x = panel_pos.x + 20.0f + item_slide_x;
 
     float const sub_tab_h = 48.0f;

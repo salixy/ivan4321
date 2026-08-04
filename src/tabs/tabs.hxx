@@ -16,6 +16,8 @@ struct tab_item_t
     sub_tab_item_t m_sub_tabs[ 4 ];
 };
 
+struct c_texture;
+
 struct c_tabs
 {
     static constexpr int k_tab_count = 7;
@@ -29,7 +31,7 @@ struct c_tabs
     animation_t m_anim_sub_hover[ k_tab_count ][ 4 ];
     animation_t m_anim_sub_bullet_rel_y[ k_tab_count ]; // Relative local panel Y coordinate
 
-    void render( ImVec2 const& panel_pos, float const panel_w, float const panel_h, float const alpha, float const delta_time, bool const can_interact, ImFont* font_medium_32, ImFont* icon_font );
+    void render( ImVec2 const& panel_pos, float const panel_w, float const panel_h, float const alpha, float const delta_time, bool const can_interact, ImFont* font_medium_32, ImFont* icon_font, c_texture const* logo_texture = nullptr );
 };
 
 extern c_tabs g_tabs;

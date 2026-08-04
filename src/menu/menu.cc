@@ -436,7 +436,8 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
             delta_time,
             m_state == menu_state_t::MAIN_DASHBOARD,
             font_medium_32,
-            icon_font
+            icon_font,
+            &m_logo_texture
         );
 
         ImGuiIO const& io = ImGui::GetIO( );
