@@ -336,7 +336,7 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
     float const ease_t = ease_quintic( t_val );
     float const cover_alpha = std::clamp( ease_t * 2.5f, 0.0f, 1.0f );
 
-    float const panel_w = lerp_f( 0.0f, 280.0f, ease_t );
+    float const panel_w = lerp_f( 0.0f, 310.0f, ease_t );
     float const panel_h = lerp_f( 275.0f, 641.0f, ease_t );
     // Smooth right-to-left entrance and exit slide animation for left overlay panel
     float const panel_x = ( m_pos.x - 30.0f ) + ( 1.0f - ease_t ) * 35.0f;
@@ -484,7 +484,7 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
             float const search_y_calc = m_pos.y + 11.0f;
 
             // Push clip rect to strictly constrain all dashboard cards & widgets within the main window boundary!
-            draw_list->PushClipRect( ImVec2( m_pos.x + 250.0f, m_pos.y ), ImVec2( m_pos.x + m_size.x, m_pos.y + m_size.y ), true );
+            draw_list->PushClipRect( ImVec2( m_pos.x + 280.0f, m_pos.y ), ImVec2( m_pos.x + m_size.x, m_pos.y + m_size.y ), true );
 
             // Search Box (temporarily commented out)
             // m_input_search.m_size = ImVec2( 280.0f, 58.0f );
