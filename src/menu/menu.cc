@@ -493,9 +493,9 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
             // m_input_search.m_text_color = IM_COL32( 0xE2, 0xE2, 0xE2, a_255 );
             // m_input_search.render( ImVec2( search_x_calc, search_y_calc ), "Search...", m_search_text, font_medium_32, delta_time, false, true );
 
-            // Content Area Rectangle Container (#1A1A1A, symmetrical 20px margins on top/bottom/right, 20px gap from tabs)
-            ImVec2 const content_min = ImVec2( m_pos.x + 265.0f + search_slide_x, m_pos.y + 20.0f );
-            ImVec2 const content_max = ImVec2( m_pos.x + m_size.x - 20.0f, m_pos.y + m_size.y - 20.0f );
+            // Content Area Rectangle Container (#1A1A1A, extending to top, bottom, and right edges of menu)
+            ImVec2 const content_min = ImVec2( m_pos.x + 265.0f + search_slide_x, m_pos.y );
+            ImVec2 const content_max = ImVec2( m_pos.x + m_size.x, m_pos.y + m_size.y );
 
             draw_list->AddRectFilled( content_min, content_max, IM_COL32( 0x1A, 0x1A, 0x1A, a_255 ), 40.0f );
 
