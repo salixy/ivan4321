@@ -284,12 +284,23 @@ void c_menu::draw_background( float const delta_time )
             ImVec2 const pos_logo_min = ImVec2( m_pos.x + 31.0f, m_pos.y + 36.0f );
             ImVec2 const pos_logo_max = ImVec2( pos_logo_min.x + 68.0f, pos_logo_min.y + 44.0f );
 
-            draw_list->AddImage(
-                ( ImTextureID )( intptr_t )m_logo_texture.m_texture_id,
-                pos_logo_min, pos_logo_max,
-                ImVec2( 0.0f, 0.0f ), ImVec2( 1.0f, 1.0f ),
-                IM_COL32( 255, 255, 255, left_a )
-            );
+            ImU32 const col_left = IM_COL32( 255, 255, 255, left_a );
+            ImU32 const col_right = IM_COL32( 158, 149, 217, left_a );
+
+            draw_list->PushTextureID( ( ImTextureID )( intptr_t )m_logo_texture.m_texture_id );
+            draw_list->PrimReserve( 6, 4 );
+            draw_list->PrimWriteIdx( ( ImDrawIdx )draw_list->_VtxCurrentIdx );
+            draw_list->PrimWriteIdx( ( ImDrawIdx )( draw_list->_VtxCurrentIdx + 1 ) );
+            draw_list->PrimWriteIdx( ( ImDrawIdx )( draw_list->_VtxCurrentIdx + 2 ) );
+            draw_list->PrimWriteIdx( ( ImDrawIdx )draw_list->_VtxCurrentIdx );
+            draw_list->PrimWriteIdx( ( ImDrawIdx )( draw_list->_VtxCurrentIdx + 2 ) );
+            draw_list->PrimWriteIdx( ( ImDrawIdx )( draw_list->_VtxCurrentIdx + 3 ) );
+
+            draw_list->PrimWriteVtx( pos_logo_min, ImVec2( 0.0f, 0.0f ), col_left );
+            draw_list->PrimWriteVtx( ImVec2( pos_logo_max.x, pos_logo_min.y ), ImVec2( 1.0f, 0.0f ), col_right );
+            draw_list->PrimWriteVtx( pos_logo_max, ImVec2( 1.0f, 1.0f ), col_right );
+            draw_list->PrimWriteVtx( ImVec2( pos_logo_min.x, pos_logo_max.y ), ImVec2( 0.0f, 1.0f ), col_left );
+            draw_list->PopTextureID( );
         }
 
         draw_list->PopClipRect( );

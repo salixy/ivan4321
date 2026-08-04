@@ -59,12 +59,24 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
         ImVec2 const logo_min = ImVec2( logo_x, panel_pos.y + 30.0f );
         ImVec2 const logo_max = ImVec2( logo_min.x + logo_w, logo_min.y + logo_h );
 
-        draw_list->AddImage(
-            ( ImTextureID )( intptr_t )logo_texture->m_texture_id,
-            logo_min, logo_max,
-            ImVec2( 0.0f, 0.0f ), ImVec2( 1.0f, 1.0f ),
-            IM_COL32( 255, 255, 255, a_255 )
-        );
+        ImU32 const col_left = IM_COL32( 255, 255, 255, a_255 );
+        ImU32 const col_right = IM_COL32( 158, 149, 217, a_255 );
+
+        draw_list->PushTextureID( ( ImTextureID )( intptr_t )logo_texture->m_texture_id );
+        draw_list->PrimReserve( 6, 4 );
+        draw_list->PrimWriteIdx( ( ImDrawIdx )draw_list->_VtxCurrentIdx );
+        draw_list->PrimWriteIdx( ( ImDrawIdx )( draw_list->_VtxCurrentIdx + 1 ) );
+        draw_list->PrimWriteIdx( ( ImDrawIdx )( draw_list->_VtxCurrentIdx + 2 ) );
+        draw_list->PrimWriteIdx( ( ImDrawIdx )draw_list->_VtxCurrentIdx );
+        draw_list->PrimWriteIdx( ( ImDrawIdx )( draw_list->_VtxCurrentIdx + 2 ) );
+        draw_list->PrimWriteIdx( ( ImDrawIdx )( draw_list->_VtxCurrentIdx + 3 ) );
+
+        draw_list->PrimWriteVtx( logo_min, ImVec2( 0.0f, 0.0f ), col_left );
+        draw_list->PrimWriteVtx( ImVec2( logo_max.x, logo_min.y ), ImVec2( 1.0f, 0.0f ), col_right );
+        draw_list->PrimWriteVtx( logo_max, ImVec2( 1.0f, 1.0f ), col_right );
+        draw_list->PrimWriteVtx( ImVec2( logo_min.x, logo_max.y ), ImVec2( 0.0f, 1.0f ), col_left );
+        draw_list->PopTextureID( );
+
         logo_h_offset = 30.0f + logo_h + 30.0f; // 104px total vertical header area
     }
 
