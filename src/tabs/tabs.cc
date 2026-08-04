@@ -23,11 +23,11 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
     ImDrawList* draw_list = ImGui::GetForegroundDrawList( );
     int const a_255 = ( int )( 255.0f * alpha );
 
-    // Minimalistic, sleek left overlay panel (#1A1A1A, rounding 20px)
+    // Minimalistic, sleek left overlay panel (#1A1A1A, rounding 40px)
     ImVec2 const p_panel_min = panel_pos;
     ImVec2 const p_panel_max = ImVec2( panel_pos.x + panel_w, panel_pos.y + panel_h );
 
-    draw_list->AddRectFilled( p_panel_min, p_panel_max, IM_COL32( 0x1A, 0x1A, 0x1A, a_255 ), 20.0f );
+    draw_list->AddRectFilled( p_panel_min, p_panel_max, IM_COL32( 0x1A, 0x1A, 0x1A, a_255 ), 40.0f );
     draw_list->PushClipRect( p_panel_min, p_panel_max, true );
 
     tab_item_t const tabs[ k_tab_count ] = {
@@ -234,15 +234,15 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
 
         if ( icon_font != nullptr )
         {
-            ImVec2 const icon_sz = icon_font->CalcTextSizeA( 22.0f, FLT_MAX, 0.0f, tabs[ i ].m_icon );
+            ImVec2 const icon_sz = icon_font->CalcTextSizeA( 20.0f, FLT_MAX, 0.0f, tabs[ i ].m_icon );
             ImVec2 const icon_pos = ImVec2( tab_min.x + 18.0f, tab_min.y + ( tab_h - icon_sz.y ) * 0.5f );
-            draw_list->AddText( icon_font, 22.0f, icon_pos, item_col, tabs[ i ].m_icon );
+            draw_list->AddText( icon_font, 20.0f, icon_pos, item_col, tabs[ i ].m_icon );
         }
 
         if ( font_medium_32 != nullptr )
         {
-            ImVec2 const text_pos = ImVec2( tab_min.x + 57.0f, tab_min.y + ( tab_h - 26.0f ) * 0.5f );
-            draw_list->AddText( font_medium_32, 26.0f, text_pos, item_col, tabs[ i ].m_name );
+            ImVec2 const text_pos = ImVec2( tab_min.x + 55.0f, tab_min.y + ( tab_h - 24.0f ) * 0.5f );
+            draw_list->AddText( font_medium_32, 24.0f, text_pos, item_col, tabs[ i ].m_name );
         }
 
         current_y += tab_h;
@@ -308,8 +308,8 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
 
                     if ( font_medium_32 != nullptr )
                     {
-                        ImVec2 const sub_txt_pos = ImVec2( sub_min.x + 18.0f, sub_min.y + ( sub_tab_h - 26.0f ) * 0.5f );
-                        draw_list->AddText( font_medium_32, 26.0f, sub_txt_pos, sub_txt_col, tabs[ i ].m_sub_tabs[ j ].m_name );
+                        ImVec2 const sub_txt_pos = ImVec2( sub_min.x + 18.0f, sub_min.y + ( sub_tab_h - 24.0f ) * 0.5f );
+                        draw_list->AddText( font_medium_32, 24.0f, sub_txt_pos, sub_txt_col, tabs[ i ].m_sub_tabs[ j ].m_name );
                     }
                 }
             }
