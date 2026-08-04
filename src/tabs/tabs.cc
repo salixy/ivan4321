@@ -41,15 +41,23 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
         { "Configs",  "\xef\x83\x87", 2, { { "Manager" }, { "Transfer" } } }
     };
 
+    float const tab_w = 225.0f;
+    float const tab_h = 52.0f;
+
     // Smooth horizontal entrance and exit slide animation for left tab menu & subtabs (right-to-left)
     float const item_slide_x = ( 1.0f - alpha ) * 35.0f;
+    float const tab_x = panel_pos.x + 20.0f + item_slide_x;
 
-    // Draw logo above tabs if provided
+    // Draw logo above tabs if provided (horizontally centered over tab width, with increased top and bottom padding)
     float logo_h_offset = 0.0f;
     if ( logo_texture != nullptr && logo_texture->m_loaded )
     {
-        ImVec2 const logo_min = ImVec2( panel_pos.x + 20.0f + item_slide_x, panel_pos.y + 20.0f );
-        ImVec2 const logo_max = ImVec2( logo_min.x + 68.0f, logo_min.y + 44.0f );
+        float const logo_w = 68.0f;
+        float const logo_h = 44.0f;
+        float const logo_x = tab_x + ( tab_w - logo_w ) * 0.5f;
+
+        ImVec2 const logo_min = ImVec2( logo_x, panel_pos.y + 30.0f );
+        ImVec2 const logo_max = ImVec2( logo_min.x + logo_w, logo_min.y + logo_h );
 
         draw_list->AddImage(
             ( ImTextureID )( intptr_t )logo_texture->m_texture_id,
@@ -57,14 +65,10 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
             ImVec2( 0.0f, 0.0f ), ImVec2( 1.0f, 1.0f ),
             IM_COL32( 255, 255, 255, a_255 )
         );
-        logo_h_offset = 64.0f;
+        logo_h_offset = 30.0f + logo_h + 30.0f; // 104px total vertical header area
     }
 
-    float const tab_start_y = panel_pos.y + 20.0f + logo_h_offset;
-    float const tab_w = 225.0f;
-    float const tab_h = 52.0f;
-
-    float const tab_x = panel_pos.x + 20.0f + item_slide_x;
+    float const tab_start_y = ( logo_h_offset > 0.0f ) ? ( panel_pos.y + logo_h_offset ) : ( panel_pos.y + 20.0f );
 
     float const sub_tab_h = 48.0f;
     float const sub_tab_spacing = 4.0f;
