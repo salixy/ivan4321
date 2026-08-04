@@ -40,7 +40,7 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
         { "Configs",  "\xef\x83\x87", 2, { { "Manager" }, { "Transfer" } } }
     };
 
-    float const tab_start_y = panel_pos.y + 60.0f;
+    float const tab_start_y = panel_pos.y + 30.0f;
     float const tab_w = 270.0f;
     float const tab_h = 52.0f;
 
