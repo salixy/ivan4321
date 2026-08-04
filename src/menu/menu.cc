@@ -339,7 +339,7 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
     float const panel_w = lerp_f( 0.0f, 310.0f, ease_t );
     float const panel_h = lerp_f( 275.0f, 641.0f, ease_t );
     // Smooth right-to-left entrance and exit slide animation for left overlay panel
-    float const panel_x = ( m_pos.x - 30.0f ) + ( 1.0f - ease_t ) * 35.0f;
+    float const panel_x = ( m_pos.x + 12.0f ) + ( 1.0f - ease_t ) * 35.0f;
     float const panel_y = m_pos.y + ( m_size.y - panel_h ) * 0.5f;
 
     float const tabs_alpha = ease_t;
@@ -484,7 +484,7 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
             float const search_y_calc = m_pos.y + 11.0f;
 
             // Push clip rect to strictly constrain all dashboard cards & widgets within the main window boundary!
-            draw_list->PushClipRect( ImVec2( m_pos.x + 280.0f, m_pos.y ), ImVec2( m_pos.x + m_size.x, m_pos.y + m_size.y ), true );
+            draw_list->PushClipRect( ImVec2( m_pos.x + 322.0f, m_pos.y ), ImVec2( m_pos.x + m_size.x, m_pos.y + m_size.y ), true );
 
             // Search Box (temporarily commented out)
             // m_input_search.m_size = ImVec2( 280.0f, 58.0f );
@@ -499,8 +499,8 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
                 int const active_tab = g_tabs.m_active_tab;
                 int const active_sub = g_tabs.m_active_sub_tab[ active_tab ];
 
-                ImVec2 const col1_pos = ImVec2( m_pos.x + 270.0f + search_slide_x, m_pos.y + 85.0f );
-                ImVec2 const col2_pos = ImVec2( m_pos.x + 663.0f + search_slide_x, m_pos.y + 85.0f );
+                ImVec2 const col1_pos = ImVec2( m_pos.x + 335.0f + search_slide_x, m_pos.y + 85.0f );
+                ImVec2 const col2_pos = ImVec2( m_pos.x + 710.0f + search_slide_x, m_pos.y + 85.0f );
                 float const col_w = 377.0f;
 
                 if ( active_tab == 0 ) // Combat
