@@ -234,15 +234,15 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
 
         if ( icon_font != nullptr )
         {
-            ImVec2 const icon_sz = icon_font->CalcTextSizeA( 19.0f, FLT_MAX, 0.0f, tabs[ i ].m_icon );
+            ImVec2 const icon_sz = icon_font->CalcTextSizeA( 22.0f, FLT_MAX, 0.0f, tabs[ i ].m_icon );
             ImVec2 const icon_pos = ImVec2( tab_min.x + 18.0f, tab_min.y + ( tab_h - icon_sz.y ) * 0.5f );
-            draw_list->AddText( icon_font, 19.0f, icon_pos, item_col, tabs[ i ].m_icon );
+            draw_list->AddText( icon_font, 22.0f, icon_pos, item_col, tabs[ i ].m_icon );
         }
 
         if ( font_medium_32 != nullptr )
         {
-            ImVec2 const text_pos = ImVec2( tab_min.x + 48.0f, tab_min.y + ( tab_h - 23.0f ) * 0.5f );
-            draw_list->AddText( font_medium_32, 23.0f, text_pos, item_col, tabs[ i ].m_name );
+            ImVec2 const text_pos = ImVec2( tab_min.x + 48.0f, tab_min.y + ( tab_h - 26.0f ) * 0.5f );
+            draw_list->AddText( font_medium_32, 26.0f, text_pos, item_col, tabs[ i ].m_name );
         }
 
         current_y += tab_h;
@@ -308,8 +308,8 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
 
                     if ( font_medium_32 != nullptr )
                     {
-                        ImVec2 const sub_txt_pos = ImVec2( sub_min.x + 18.0f, sub_min.y + ( sub_tab_h - 23.0f ) * 0.5f );
-                        draw_list->AddText( font_medium_32, 23.0f, sub_txt_pos, sub_txt_col, tabs[ i ].m_sub_tabs[ j ].m_name );
+                        ImVec2 const sub_txt_pos = ImVec2( sub_min.x + 18.0f, sub_min.y + ( sub_tab_h - 26.0f ) * 0.5f );
+                        draw_list->AddText( font_medium_32, 26.0f, sub_txt_pos, sub_txt_col, tabs[ i ].m_sub_tabs[ j ].m_name );
                     }
                 }
             }
