@@ -341,7 +341,7 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
         float const start_logo_y = m_pos.y + 36.0f;
 
         float const end_logo_x = panel_x + 20.0f + ( tab_w - logo_w ) * 0.5f;
-        float const end_logo_y = m_pos.y + 30.0f;
+        float const end_logo_y = m_pos.y + 25.0f;
 
         float const curr_logo_x = lerp_f( start_logo_x, end_logo_x, ease_t );
         float const curr_logo_y = lerp_f( start_logo_y, end_logo_y, ease_t );
@@ -351,13 +351,17 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
 
         int const logo_a = 255;
 
-        // Left side stays pure white (255, 255, 255)
-        ImU32 const col_left = IM_COL32( 255, 255, 255, logo_a );
+        // Subtext color on login screen: RGB(27, 22, 41) / 0x1B, 0x16, 0x29
+        // Left side lerps from subtext color (27, 22, 41) to pure white (255, 255, 255)
+        float const r_left = lerp_f( 27.0f, 255.0f, ease_t );
+        float const g_left = lerp_f( 22.0f, 255.0f, ease_t );
+        float const b_left = lerp_f( 41.0f, 255.0f, ease_t );
+        ImU32 const col_left = IM_COL32( ( int )r_left, ( int )g_left, ( int )b_left, logo_a );
 
-        // Right side smoothly transitions from pure white (255, 255, 255) to accent (158, 149, 217) as ease_t animates from 0.0 to 1.0!
-        float const r_right = lerp_f( 255.0f, 158.0f, ease_t );
-        float const g_right = lerp_f( 255.0f, 149.0f, ease_t );
-        float const b_right = lerp_f( 255.0f, 217.0f, ease_t );
+        // Right side lerps from subtext color (27, 22, 41) to accent color (158, 149, 217)
+        float const r_right = lerp_f( 27.0f, 158.0f, ease_t );
+        float const g_right = lerp_f( 22.0f, 149.0f, ease_t );
+        float const b_right = lerp_f( 41.0f, 217.0f, ease_t );
         ImU32 const col_right = IM_COL32( ( int )r_right, ( int )g_right, ( int )b_right, logo_a );
 
         ImDrawList* draw_list = ImGui::GetForegroundDrawList( );
