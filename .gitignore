@@ -1,0 +1,11 @@
+# Build directory
+build/
+*.exe
+*.obj
+*.lib
+*.dll
+*.pdb
+
+# Local config & temporary files
+imgui.ini
+scratch/*.exe
