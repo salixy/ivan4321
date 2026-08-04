@@ -486,13 +486,12 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
             // Push clip rect to strictly constrain all dashboard cards & widgets within the main window boundary!
             draw_list->PushClipRect( ImVec2( m_pos.x + 250.0f, m_pos.y ), ImVec2( m_pos.x + m_size.x, m_pos.y + m_size.y ), true );
 
-            m_input_search.m_size = ImVec2( 280.0f, 58.0f );
-            m_input_search.m_bg_color = IM_COL32( 0x1A, 0x1A, 0x1A, a_255 );
-            m_input_search.m_placeholder_color = IM_COL32( 0x4B, 0x4B, 0x4B, a_255 );
-            m_input_search.m_text_color = IM_COL32( 0xE2, 0xE2, 0xE2, a_255 );
-
-            // Render Search Box with Loupe Icon
-            m_input_search.render( ImVec2( search_x_calc, search_y_calc ), "Search...", m_search_text, font_medium_32, delta_time, false, true );
+            // Search Box (temporarily commented out)
+            // m_input_search.m_size = ImVec2( 280.0f, 58.0f );
+            // m_input_search.m_bg_color = IM_COL32( 0x1A, 0x1A, 0x1A, a_255 );
+            // m_input_search.m_placeholder_color = IM_COL32( 0x4B, 0x4B, 0x4B, a_255 );
+            // m_input_search.m_text_color = IM_COL32( 0xE2, 0xE2, 0xE2, a_255 );
+            // m_input_search.render( ImVec2( search_x_calc, search_y_calc ), "Search...", m_search_text, font_medium_32, delta_time, false, true );
 
             // Render active tab & subtab content cards
             if ( g_tabs.m_active_tab >= 0 && g_tabs.m_active_tab < c_tabs::k_tab_count )
