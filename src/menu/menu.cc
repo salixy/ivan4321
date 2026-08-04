@@ -336,7 +336,7 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
     float const ease_t = ease_quintic( t_val );
     float const cover_alpha = std::clamp( ease_t * 2.5f, 0.0f, 1.0f );
 
-    float const panel_w = lerp_f( 0.0f, 310.0f, ease_t );
+    float const panel_w = lerp_f( 0.0f, 220.0f, ease_t );
     float const panel_h = lerp_f( 275.0f, 641.0f, ease_t );
     // Smooth right-to-left entrance and exit slide animation for left overlay panel
     float const panel_x = ( m_pos.x + 12.0f ) + ( 1.0f - ease_t ) * 35.0f;
@@ -484,7 +484,7 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
             float const search_y_calc = m_pos.y + 11.0f;
 
             // Push clip rect to strictly constrain all dashboard cards & widgets within the main window boundary!
-            draw_list->PushClipRect( ImVec2( m_pos.x + 322.0f, m_pos.y ), ImVec2( m_pos.x + m_size.x, m_pos.y + m_size.y ), true );
+            draw_list->PushClipRect( ImVec2( m_pos.x + 220.0f, m_pos.y ), ImVec2( m_pos.x + m_size.x, m_pos.y + m_size.y ), true );
 
             // Search Box (temporarily commented out)
             // m_input_search.m_size = ImVec2( 280.0f, 58.0f );
@@ -493,11 +493,12 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
             // m_input_search.m_text_color = IM_COL32( 0xE2, 0xE2, 0xE2, a_255 );
             // m_input_search.render( ImVec2( search_x_calc, search_y_calc ), "Search...", m_search_text, font_medium_32, delta_time, false, true );
 
-            // Content Area Rectangle Container (#1A1A1A, rounding 40px)
-            ImVec2 const content_min = ImVec2( m_pos.x + 335.0f + search_slide_x, m_pos.y + 12.0f );
-            ImVec2 const content_max = ImVec2( m_pos.x + m_size.x - 12.0f, m_pos.y + m_size.y - 12.0f );
+            // Content Area Rectangle Container (#1A1A1A, extending fully to top, bottom, and right edges)
+            ImVec2 const content_min = ImVec2( m_pos.x + 230.0f + search_slide_x, m_pos.y );
+            ImVec2 const content_max = ImVec2( m_pos.x + m_size.x, m_pos.y + m_size.y );
 
-            draw_list->AddRectFilled( content_min, content_max, IM_COL32( 0x1A, 0x1A, 0x1A, a_255 ), 40.0f );
+            ImDrawFlags const right_rounding_flags = ImDrawFlags_RoundCornersTopRight | ImDrawFlags_RoundCornersBottomRight;
+            draw_list->AddRectFilled( content_min, content_max, IM_COL32( 0x1A, 0x1A, 0x1A, a_255 ), 40.0f, right_rounding_flags );
 
             // Render active tab & subtab content cards
             if ( g_tabs.m_active_tab >= 0 && g_tabs.m_active_tab < c_tabs::k_tab_count )
@@ -505,9 +506,9 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
                 int const active_tab = g_tabs.m_active_tab;
                 int const active_sub = g_tabs.m_active_sub_tab[ active_tab ];
 
-                ImVec2 const col1_pos = ImVec2( content_min.x + 20.0f, content_min.y + 20.0f );
-                ImVec2 const col2_pos = ImVec2( content_min.x + 360.0f, content_min.y + 20.0f );
-                float const col_w = 330.0f;
+                ImVec2 const col1_pos = ImVec2( content_min.x + 25.0f, content_min.y + 25.0f );
+                ImVec2 const col2_pos = ImVec2( content_min.x + 420.0f, content_min.y + 25.0f );
+                float const col_w = 370.0f;
 
                 if ( active_tab == 0 ) // Combat
                 {
