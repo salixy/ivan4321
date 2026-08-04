@@ -23,11 +23,11 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
     ImDrawList* draw_list = ImGui::GetForegroundDrawList( );
     int const a_255 = ( int )( 255.0f * alpha );
 
-    // Minimalistic, sleek left overlay panel (#1A1A1A, rounding 40px)
+    // Minimalistic left overlay panel clip rect (background box removed per request)
     ImVec2 const p_panel_min = panel_pos;
     ImVec2 const p_panel_max = ImVec2( panel_pos.x + panel_w, panel_pos.y + panel_h );
 
-    draw_list->AddRectFilled( p_panel_min, p_panel_max, IM_COL32( 0x1A, 0x1A, 0x1A, a_255 ), 40.0f );
+    // draw_list->AddRectFilled( p_panel_min, p_panel_max, IM_COL32( 0x1A, 0x1A, 0x1A, a_255 ), 40.0f );
     draw_list->PushClipRect( p_panel_min, p_panel_max, true );
 
     tab_item_t const tabs[ k_tab_count ] = {
