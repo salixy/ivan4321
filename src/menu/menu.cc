@@ -339,7 +339,7 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
     float const panel_w = lerp_f( 0.0f, 265.0f, ease_t );
     float const panel_h = lerp_f( 275.0f, 641.0f, ease_t );
     // Smooth right-to-left entrance and exit slide animation for left overlay panel
-    float const panel_x = ( m_pos.x + 12.0f ) + ( 1.0f - ease_t ) * 35.0f;
+    float const panel_x = m_pos.x + ( 1.0f - ease_t ) * 35.0f;
     float const panel_y = m_pos.y + ( m_size.y - panel_h ) * 0.5f;
 
     float const tabs_alpha = ease_t;
@@ -484,7 +484,7 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
             float const search_y_calc = m_pos.y + 11.0f;
 
             // Push clip rect to strictly constrain all dashboard cards & widgets within the main window boundary!
-            draw_list->PushClipRect( ImVec2( m_pos.x + 265.0f, m_pos.y ), ImVec2( m_pos.x + m_size.x, m_pos.y + m_size.y ), true );
+            draw_list->PushClipRect( ImVec2( m_pos.x + 250.0f, m_pos.y ), ImVec2( m_pos.x + m_size.x, m_pos.y + m_size.y ), true );
 
             // Search Box (temporarily commented out)
             // m_input_search.m_size = ImVec2( 280.0f, 58.0f );
@@ -493,9 +493,9 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
             // m_input_search.m_text_color = IM_COL32( 0xE2, 0xE2, 0xE2, a_255 );
             // m_input_search.render( ImVec2( search_x_calc, search_y_calc ), "Search...", m_search_text, font_medium_32, delta_time, false, true );
 
-            // Content Area Rectangle Container (#1A1A1A, all 4 corners rounded with 40px)
-            ImVec2 const content_min = ImVec2( m_pos.x + 270.0f + search_slide_x, m_pos.y );
-            ImVec2 const content_max = ImVec2( m_pos.x + m_size.x, m_pos.y + m_size.y );
+            // Content Area Rectangle Container (#1A1A1A, symmetrical 20px margins on top/bottom/right, 20px gap from tabs)
+            ImVec2 const content_min = ImVec2( m_pos.x + 265.0f + search_slide_x, m_pos.y + 20.0f );
+            ImVec2 const content_max = ImVec2( m_pos.x + m_size.x - 20.0f, m_pos.y + m_size.y - 20.0f );
 
             draw_list->AddRectFilled( content_min, content_max, IM_COL32( 0x1A, 0x1A, 0x1A, a_255 ), 40.0f );
 
