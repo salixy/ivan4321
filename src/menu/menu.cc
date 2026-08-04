@@ -173,6 +173,10 @@ void c_menu::draw_background( float const delta_time )
     float const left_fade = 1.0f - cover_alpha;
     int const left_a = ( int )( left_fade * 255.0f );
 
+    // Accelerated fade-out for character image, social icons, and text elements during login transition
+    float const fast_fade = std::clamp( 1.0f - ease_t * 4.5f, 0.0f, 1.0f );
+    int const fast_a = ( int )( fast_fade * 255.0f );
+
     // Main rounded background container (#161616) - full window container on all frames
     draw_list->AddRectFilled( p_min, p_max, bg_color, rounding );
 
@@ -198,7 +202,7 @@ void c_menu::draw_background( float const delta_time )
             );
         }
 
-        if ( m_cici_texture.m_loaded )
+        if ( m_cici_texture.m_loaded && fast_fade > 0.001f )
         {
             float const aspect1 = ( float )m_cici_texture.m_width / ( float )m_cici_texture.m_height;
             float const char_h = m_size.y;
@@ -212,13 +216,13 @@ void c_menu::draw_background( float const delta_time )
             draw_list->AddImage(
                 ( ImTextureID )( intptr_t )m_cici_texture.m_texture_id,
                 cici_min, cici_max, ImVec2( 0.0f, 0.0f ),
-                ImVec2( 1.0f, 1.0f ), IM_COL32( 255, 255, 255, ( int )( left_fade * 128.0f ) )
+                ImVec2( 1.0f, 1.0f ), IM_COL32( 255, 255, 255, ( int )( fast_fade * 128.0f ) )
             );
         }
 
         // Render Telegram & Discord brand icons
         ImFont* brand_font = ( g_fonts.m_brand_font_40 != nullptr ) ? g_fonts.m_brand_font_40 : g_fonts.m_icon_font;
-        if ( brand_font != nullptr )
+        if ( brand_font != nullptr && fast_fade > 0.001f )
         {
             ImVec2 const tg_pos = ImVec2( m_pos.x + 31.0f, m_pos.y + 102.67f );
             ImVec2 const discord_pos = ImVec2( tg_pos.x + 35.0f, m_pos.y + 102.67f );
@@ -244,14 +248,14 @@ void c_menu::draw_background( float const delta_time )
                 ( int )( 156.0f + 99.0f * tg_val ),
                 ( int )( 148.0f + 107.0f * tg_val ),
                 ( int )( 200.0f + 55.0f * tg_val ),
-                left_a
+                fast_a
             );
 
             ImU32 const col_discord = IM_COL32(
                 ( int )( 156.0f + 99.0f * discord_val ),
                 ( int )( 148.0f + 107.0f * discord_val ),
                 ( int )( 200.0f + 55.0f * discord_val ),
-                left_a
+                fast_a
             );
 
             char const* icon_telegram = "\xef\x8b\x86";
@@ -263,16 +267,16 @@ void c_menu::draw_background( float const delta_time )
 
         // Text "mareland" & "best of best."
         ImFont* calsans_font = ( g_fonts.m_calsans_42 != nullptr ) ? g_fonts.m_calsans_42 : g_fonts.m_medium_32;
-        if ( calsans_font != nullptr )
+        if ( calsans_font != nullptr && fast_fade > 0.001f )
         {
             float const text_x = m_pos.x + 31.0f;
             float const text_y = m_pos.y + 182.0f;
-            ImU32 const text_col = IM_COL32( 255, 255, 255, left_a );
+            ImU32 const text_col = IM_COL32( 255, 255, 255, fast_a );
 
             draw_list->AddText( calsans_font, 42.0f, ImVec2( text_x + 0.8f, text_y ), text_col, "mareland" );
             draw_list->AddText( calsans_font, 42.0f, ImVec2( text_x, text_y ), text_col, "mareland" );
 
-            ImU32 const col_subtext = IM_COL32( 0x1B, 0x16, 0x29, left_a );
+            ImU32 const col_subtext = IM_COL32( 0x1B, 0x16, 0x29, fast_a );
             float const line2_y = text_y + 30.0f;
             draw_list->AddText( calsans_font, 42.0f, ImVec2( text_x + 0.8f, line2_y ), col_subtext, "best of best." );
             draw_list->AddText( calsans_font, 42.0f, ImVec2( text_x, line2_y ), col_subtext, "best of best." );
