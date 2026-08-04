@@ -241,7 +241,7 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
 
         if ( font_medium_32 != nullptr )
         {
-            ImVec2 const text_pos = ImVec2( tab_min.x + 48.0f, tab_min.y + ( tab_h - 26.0f ) * 0.5f );
+            ImVec2 const text_pos = ImVec2( tab_min.x + 54.0f, tab_min.y + ( tab_h - 26.0f ) * 0.5f );
             draw_list->AddText( font_medium_32, 26.0f, text_pos, item_col, tabs[ i ].m_name );
         }
 
