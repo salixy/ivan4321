@@ -102,7 +102,11 @@ bool c_texture::load_from_file( char const* filename )
     glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data );
 
     typedef void ( APIENTRY * PFNGLGENERATEMIPMAPPROC )( GLenum target );
+#ifdef USE_SDL
+    PFNGLGENERATEMIPMAPPROC glGenerateMipmapFunc = ( PFNGLGENERATEMIPMAPPROC )SDL_GL_GetProcAddress( "glGenerateMipmap" );
+#else
     PFNGLGENERATEMIPMAPPROC glGenerateMipmapFunc = ( PFNGLGENERATEMIPMAPPROC )glfwGetProcAddress( "glGenerateMipmap" );
+#endif
     if ( glGenerateMipmapFunc != nullptr )
     {
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );

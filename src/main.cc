@@ -3,7 +3,13 @@
 
 int main( int, char** )
 {
-    if ( !g_render.init( 1280, 720, "Dear ImGui GLFW+OpenGL3 example" ) )
+#ifdef USE_SDL
+    char const* window_title = "Dear ImGui SDL2+OpenGL3 example";
+#else
+    char const* window_title = "Dear ImGui GLFW+OpenGL3 example";
+#endif
+
+    if ( !g_render.init( 1280, 720, window_title ) )
     {
         return 1;
     }
@@ -14,7 +20,7 @@ int main( int, char** )
 
     while ( !g_render.should_close( ) )
     {
-        double const current_time = glfwGetTime( );
+        double const current_time = g_render.get_time( );
 
         g_render.start_frame( );
         if ( g_menu.m_open )
@@ -30,3 +36,4 @@ int main( int, char** )
 
     return 0;
 }
+

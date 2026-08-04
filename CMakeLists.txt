@@ -6,16 +6,23 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(FetchContent)
 
-# Fetch GLFW for OpenGL windowing
-FetchContent_Declare(
-    glfw
-    GIT_REPOSITORY https://github.com/glfw/glfw.git
-    GIT_TAG        3.4
-)
-set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(glfw)
+option(USE_SDL "Use SDL2 instead of GLFW" ON)
+
+if(USE_SDL)
+    find_package(SDL2 REQUIRED)
+    add_compile_definitions(USE_SDL)
+else()
+    # Fetch GLFW for OpenGL windowing
+    FetchContent_Declare(
+        glfw
+        GIT_REPOSITORY https://github.com/glfw/glfw.git
+        GIT_TAG        3.4
+    )
+    set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+    set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+    set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(glfw)
+endif()
 
 # Fetch FreeType
 FetchContent_Declare(
@@ -37,10 +44,15 @@ set(IMGUI_SOURCES
     ${IMGUI_DIR}/imgui_draw.cpp
     ${IMGUI_DIR}/imgui_tables.cpp
     ${IMGUI_DIR}/imgui_widgets.cpp
-    ${IMGUI_DIR}/backends/imgui_impl_glfw.cpp
     ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
     ${IMGUI_DIR}/misc/freetype/imgui_freetype.cpp
 )
+
+if(USE_SDL)
+    list(APPEND IMGUI_SOURCES ${IMGUI_DIR}/backends/imgui_impl_sdl2.cpp)
+else()
+    list(APPEND IMGUI_SOURCES ${IMGUI_DIR}/backends/imgui_impl_glfw.cpp)
+endif()
 
 set(APP_SOURCES
     src/main.cc
@@ -65,11 +77,18 @@ target_include_directories(ImGuiApp PRIVATE
     ${IMGUI_DIR}/backends
 )
 
-# Link GLFW and OpenGL
+# Link GLFW/SDL2 and OpenGL
 find_package(OpenGL REQUIRED)
 
+if(USE_SDL)
+    target_include_directories(ImGuiApp PRIVATE ${SDL2_INCLUDE_DIRS})
+    target_link_libraries(ImGuiApp PRIVATE ${SDL2_LIBRARIES} OpenGL::GL freetype)
+else()
+    target_link_libraries(ImGuiApp PRIVATE glfw OpenGL::GL freetype)
+endif()
+
 target_compile_definitions(ImGuiApp PRIVATE IMGUI_ENABLE_FREETYPE)
-target_link_libraries(ImGuiApp PRIVATE glfw OpenGL::GL freetype)
 
 # Copy assets to build directory
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/assets DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
