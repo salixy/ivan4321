@@ -278,20 +278,6 @@ void c_menu::draw_background( float const delta_time )
             draw_list->AddText( calsans_font, 42.0f, ImVec2( text_x, line2_y ), col_subtext, "best of best." );
         }
 
-        // Logo (logo.png)
-        if ( m_logo_texture.m_loaded )
-        {
-            ImVec2 const pos_logo_min = ImVec2( m_pos.x + 31.0f, m_pos.y + 36.0f );
-            ImVec2 const pos_logo_max = ImVec2( pos_logo_min.x + 68.0f, pos_logo_min.y + 44.0f );
-
-            draw_list->AddImage(
-                ( ImTextureID )( intptr_t )m_logo_texture.m_texture_id,
-                pos_logo_min, pos_logo_max,
-                ImVec2( 0.0f, 0.0f ), ImVec2( 1.0f, 1.0f ),
-                IM_COL32( 255, 255, 255, left_a )
-            );
-        }
-
         draw_list->PopClipRect( );
     }
 
@@ -343,6 +329,53 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
     float const panel_y = m_pos.y + ( m_size.y - panel_h ) * 0.5f;
 
     float const tabs_alpha = ease_t;
+
+    // Render Logo with smooth position slide & white-to-accent color gradient transition upon Login
+    if ( m_logo_texture.m_loaded )
+    {
+        float const tab_w = 225.0f;
+        float const logo_w = 68.0f;
+        float const logo_h = 44.0f;
+
+        float const start_logo_x = m_pos.x + 31.0f;
+        float const start_logo_y = m_pos.y + 36.0f;
+
+        float const end_logo_x = panel_x + 20.0f + ( tab_w - logo_w ) * 0.5f;
+        float const end_logo_y = m_pos.y + 30.0f;
+
+        float const curr_logo_x = lerp_f( start_logo_x, end_logo_x, ease_t );
+        float const curr_logo_y = lerp_f( start_logo_y, end_logo_y, ease_t );
+
+        ImVec2 const pos_logo_min = ImVec2( curr_logo_x, curr_logo_y );
+        ImVec2 const pos_logo_max = ImVec2( pos_logo_min.x + logo_w, pos_logo_min.y + logo_h );
+
+        int const logo_a = 255;
+
+        // Left side stays pure white (255, 255, 255)
+        ImU32 const col_left = IM_COL32( 255, 255, 255, logo_a );
+
+        // Right side smoothly transitions from pure white (255, 255, 255) to accent (158, 149, 217) as ease_t animates from 0.0 to 1.0!
+        float const r_right = lerp_f( 255.0f, 158.0f, ease_t );
+        float const g_right = lerp_f( 255.0f, 149.0f, ease_t );
+        float const b_right = lerp_f( 255.0f, 217.0f, ease_t );
+        ImU32 const col_right = IM_COL32( ( int )r_right, ( int )g_right, ( int )b_right, logo_a );
+
+        ImDrawList* draw_list = ImGui::GetForegroundDrawList( );
+        draw_list->PushTextureID( ( ImTextureID )( intptr_t )m_logo_texture.m_texture_id );
+        draw_list->PrimReserve( 6, 4 );
+        draw_list->PrimWriteIdx( ( ImDrawIdx )draw_list->_VtxCurrentIdx );
+        draw_list->PrimWriteIdx( ( ImDrawIdx )( draw_list->_VtxCurrentIdx + 1 ) );
+        draw_list->PrimWriteIdx( ( ImDrawIdx )( draw_list->_VtxCurrentIdx + 2 ) );
+        draw_list->PrimWriteIdx( ( ImDrawIdx )draw_list->_VtxCurrentIdx );
+        draw_list->PrimWriteIdx( ( ImDrawIdx )( draw_list->_VtxCurrentIdx + 2 ) );
+        draw_list->PrimWriteIdx( ( ImDrawIdx )( draw_list->_VtxCurrentIdx + 3 ) );
+
+        draw_list->PrimWriteVtx( pos_logo_min, ImVec2( 0.0f, 0.0f ), col_left );
+        draw_list->PrimWriteVtx( ImVec2( pos_logo_max.x, pos_logo_min.y ), ImVec2( 1.0f, 0.0f ), col_right );
+        draw_list->PrimWriteVtx( pos_logo_max, ImVec2( 1.0f, 1.0f ), col_right );
+        draw_list->PrimWriteVtx( ImVec2( pos_logo_min.x, pos_logo_max.y ), ImVec2( 0.0f, 1.0f ), col_left );
+        draw_list->PopTextureID( );
+    }
 
     // Render Login Inputs Area (Username, Password, Login Arrow Button)
     if ( cover_alpha < 0.999f )
