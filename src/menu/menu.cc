@@ -212,16 +212,17 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
         {
             draw_list->PushClipRect( m_pos, ImVec2( m_pos.x + m_size.x, m_pos.y + m_size.y ), true );
 
-            int const glow_layers = 64;
-            float const peak_alpha = 51.0f * ease_t;
-            float const layer_step_a = peak_alpha / ( float )glow_layers;
+            int const glow_layers = 24;
+            float const max_expand = 32.0f;
 
-            for ( int i = glow_layers; i >= 1; --i )
+            for ( int i = glow_layers; i >= 0; --i )
             {
                 float const pass_t = ( float )i / ( float )glow_layers;
-                float const expand = pass_t * 126.0f;
-                float const alpha_factor = std::pow( 1.0f - pass_t, 1.5f );
-                int const glow_a = std::max( 1, ( int )( alpha_factor * layer_step_a * 2.2f ) );
+                float const expand = pass_t * max_expand;
+                float const falloff = ( 1.0f - pass_t );
+                int const glow_a = ( int )( falloff * falloff * 45.0f * ease_t );
+
+                if ( glow_a <= 0 ) continue;
 
                 ImVec2 const g_min = ImVec2( pos_logo_min.x - expand, pos_logo_min.y - expand );
                 ImVec2 const g_max = ImVec2( pos_logo_max.x + expand, pos_logo_max.y + expand );
