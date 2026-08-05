@@ -189,8 +189,8 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
             // Draw subtle whitish background & soft whitish border for active/hovered tab
             if ( h_val > 0.001f )
             {
-                int const bg_alpha = ( int )( lerp_f( 0.0f, 10.0f, h_val ) * alpha );
-                int const border_alpha = ( int )( lerp_f( 0.0f, 18.0f, h_val ) * alpha );
+                int const bg_alpha = ( int )( lerp_f( 0.0f, 5.0f, h_val ) * alpha );
+                int const border_alpha = ( int )( lerp_f( 0.0f, 8.0f, h_val ) * alpha );
 
                 draw_list->AddRectFilled( item_min, item_max, IM_COL32( 255, 255, 255, bg_alpha ), 12.0f );
                 draw_list->AddRect( item_min, item_max, IM_COL32( 255, 255, 255, border_alpha ), 12.0f, 0, 1.0f );
