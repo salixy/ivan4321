@@ -42,34 +42,40 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
 
     draw_list->PushClipRect( p_panel_min, p_panel_max, true );
 
-    struct category_t
+    struct tab_child_t
     {
         char const* m_name;
         char const* m_icon;
+    };
+
+    struct category_t
+    {
+        char const* m_name;
         int         m_item_count;
-        char const* m_items[ 4 ];
+        tab_child_t m_items[ 4 ];
     };
 
     category_t const categories[ k_tab_count ] = {
-        { "Combat",   "\xef\x84\xb5", 3, { "Aim", "Triggerbot", "Accuracy" } },
-        { "Visuals",  "\xef\x81\xae", 3, { "ESP", "Effects", "Settings" } },
-        { "Movement", "\xef\x95\x94", 2, { "Assistance", "Exploits" } },
-        { "World",    "\xef\x82\xac", 2, { "Environment", "Visual Style" } },
-        { "Menu",     "\xef\x80\x93", 2, { "Appearance", "Animation" } },
-        { "Misc",     "\xef\x87\x9e", 2, { "General", "Utilities" } },
-        { "Configs",  "\xef\x83\x87", 2, { "Manager", "Transfer" } }
+        { "Combat",   3, { { "Aim", "\xef\x84\xb5" }, { "Triggerbot", "\xef\x80\x91" }, { "Accuracy", "\xef\x87\x9e" } } },
+        { "Visuals",  3, { { "ESP", "\xef\x81\xae" }, { "Effects", "\xef\x81\x82" }, { "Settings", "\xef\x80\x93" } } },
+        { "Movement", 2, { { "Assistance", "\xef\x95\x94" }, { "Exploits", "\xef\x87\x9b" } } },
+        { "World",    2, { { "Environment", "\xef\x82\xac" }, { "Visual Style", "\xef\x81\xbc" } } },
+        { "Menu",     2, { { "Appearance", "\xef\x80\x93" }, { "Animation", "\xef\x85\x90" } } },
+        { "Misc",     2, { { "General", "\xef\x80\x93" }, { "Utilities", "\xef\x87\x9e" } } },
+        { "Configs",  2, { { "Manager", "\xef\x83\x87" }, { "Transfer", "\xef\x82\xac" } } }
     };
 
     float const item_slide_x = ( 1.0f - alpha ) * 35.0f;
-    float const cat_x = panel_pos.x + 35.0f + item_slide_x;
-    float const item_x = panel_pos.x + 45.0f + item_slide_x;
+    float const cat_x = panel_pos.x + 22.0f + item_slide_x;
+    float const item_x = panel_pos.x + 22.0f + item_slide_x;
+    float const item_w = 205.0f;
 
     float const logo_h_offset = ( logo_texture != nullptr && logo_texture->m_loaded ) ? 100.0f : 0.0f;
     float const base_start_y = ( logo_h_offset > 0.0f ) ? ( panel_pos.y + logo_h_offset ) : ( panel_pos.y + 20.0f );
 
-    float const cat_header_h = 28.0f;
+    float const cat_header_h = 24.0f;
     float const item_h = 36.0f;
-    float const item_spacing = 2.0f;
+    float const item_spacing = 3.0f;
     float const cat_spacing = 14.0f;
 
     // Default to first tab (Combat -> Aim) if no tab is selected
@@ -122,7 +128,7 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
         for ( int j = 0; j < categories[ i ].m_item_count; ++j )
         {
             ImVec2 const t_min = ImVec2( item_x, calc_y );
-            ImVec2 const t_max = ImVec2( item_x + 200.0f, calc_y + item_h );
+            ImVec2 const t_max = ImVec2( item_x + item_w, calc_y + item_h );
 
             if ( mouse_pos.x >= t_min.x && mouse_pos.x <= t_max.x &&
                  mouse_pos.y >= t_min.y && mouse_pos.y <= t_max.y )
@@ -151,24 +157,15 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
 
     for ( int i = 0; i < k_tab_count; ++i )
     {
-        // Render Category Header (Icon + Smaller, darker text description)
+        // Render Category Header (Darker text description without icon)
         ImVec2 const cat_min = ImVec2( cat_x, current_y );
-
-        ImU32 const icon_col = IM_COL32( 65, 60, 75, ( int )( 160.0f * alpha ) );
-        ImU32 const title_col = IM_COL32( 72, 68, 80, ( int )( 170.0f * alpha ) );
-
-        if ( icon_font != nullptr )
-        {
-            ImVec2 const icon_sz = icon_font->CalcTextSizeA( 16.0f, FLT_MAX, 0.0f, categories[ i ].m_icon );
-            ImVec2 const icon_pos = ImVec2( cat_min.x, cat_min.y + ( cat_header_h - icon_sz.y ) * 0.5f );
-            draw_list->AddText( icon_font, 16.0f, icon_pos, icon_col, categories[ i ].m_icon );
-        }
+        ImU32 const title_col = IM_COL32( 62, 58, 70, ( int )( 170.0f * alpha ) );
 
         if ( font_medium_32 != nullptr )
         {
             std::string const upper_name = to_upper( categories[ i ].m_name );
-            ImVec2 const text_pos = ImVec2( cat_min.x + 24.0f, cat_min.y + ( cat_header_h - 16.0f ) * 0.5f );
-            draw_list->AddText( font_medium_32, 16.0f, text_pos, title_col, upper_name.c_str( ) );
+            ImVec2 const text_pos = ImVec2( cat_min.x, cat_min.y + ( cat_header_h - 15.0f ) * 0.5f );
+            draw_list->AddText( font_medium_32, 15.0f, text_pos, title_col, upper_name.c_str( ) );
         }
 
         current_y += cat_header_h;
@@ -177,29 +174,46 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
         for ( int j = 0; j < categories[ i ].m_item_count; ++j )
         {
             ImVec2 const item_min = ImVec2( item_x, current_y );
-            ImVec2 const item_max = ImVec2( item_x + 200.0f, current_y + item_h );
+            ImVec2 const item_max = ImVec2( item_x + item_w, current_y + item_h );
 
             bool const is_selected = ( m_active_tab == i && m_active_sub_tab[ i ] == j );
             bool const is_hovered = ( mouse_pos.x >= item_min.x && mouse_pos.x <= item_max.x &&
                                       mouse_pos.y >= item_min.y && mouse_pos.y <= item_max.y );
 
             m_anim_sub_hover[ i ][ j ].m_speed = 12.0f;
-            m_anim_sub_hover[ i ][ j ].set( is_selected ? 1.0f : ( is_hovered ? 0.5f : 0.0f ) );
+            m_anim_sub_hover[ i ][ j ].set( is_selected ? 1.0f : ( is_hovered ? 0.4f : 0.0f ) );
             m_anim_sub_hover[ i ][ j ].update( delta_time );
 
             float const h_val = m_anim_sub_hover[ i ][ j ].m_value;
 
-            // Text color lerp from inactive (110, 110, 125) to active accent (158, 149, 217)
+            // Draw subtle whitish background & soft whitish border for active/hovered tab
+            if ( h_val > 0.001f )
+            {
+                int const bg_alpha = ( int )( lerp_f( 0.0f, 20.0f, h_val ) * alpha );
+                int const border_alpha = ( int )( lerp_f( 0.0f, 35.0f, h_val ) * alpha );
+
+                draw_list->AddRectFilled( item_min, item_max, IM_COL32( 255, 255, 255, bg_alpha ), 8.0f );
+                draw_list->AddRect( item_min, item_max, IM_COL32( 255, 255, 255, border_alpha ), 8.0f, 0, 1.0f );
+            }
+
+            // Text & icon color transition from inactive (110, 110, 125) to active accent (158, 149, 217)
             float const r_txt = lerp_f( 110.0f, 158.0f, h_val );
             float const g_txt = lerp_f( 110.0f, 149.0f, h_val );
             float const b_txt = lerp_f( 125.0f, 217.0f, h_val );
 
             ImU32 const item_col = IM_COL32( ( int )r_txt, ( int )g_txt, ( int )b_txt, a_255 );
 
+            if ( icon_font != nullptr )
+            {
+                ImVec2 const icon_sz = icon_font->CalcTextSizeA( 18.0f, FLT_MAX, 0.0f, categories[ i ].m_items[ j ].m_icon );
+                ImVec2 const icon_pos = ImVec2( item_min.x + 12.0f, item_min.y + ( item_h - icon_sz.y ) * 0.5f );
+                draw_list->AddText( icon_font, 18.0f, icon_pos, item_col, categories[ i ].m_items[ j ].m_icon );
+            }
+
             if ( font_medium_32 != nullptr )
             {
-                ImVec2 const text_pos = ImVec2( item_min.x + 12.0f, item_min.y + ( item_h - 25.0f ) * 0.5f );
-                draw_list->AddText( font_medium_32, 25.0f, text_pos, item_col, categories[ i ].m_items[ j ] );
+                ImVec2 const text_pos = ImVec2( item_min.x + 38.0f, item_min.y + ( item_h - 25.0f ) * 0.5f );
+                draw_list->AddText( font_medium_32, 25.0f, text_pos, item_col, categories[ i ].m_items[ j ].m_name );
             }
 
             current_y += item_h + item_spacing;
