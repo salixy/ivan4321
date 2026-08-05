@@ -68,7 +68,7 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
     float const item_x = panel_pos.x + 20.0f + item_slide_x;
     float const item_pad_x = 18.0f;
     float const cat_x = item_x + item_pad_x;
-    float const item_w = 225.0f;
+    float const item_w = 235.0f;
 
     float const logo_h_offset = ( logo_texture != nullptr && logo_texture->m_loaded ) ? 100.0f : 0.0f;
     float const base_start_y = ( logo_h_offset > 0.0f ) ? ( panel_pos.y + logo_h_offset ) : ( panel_pos.y + 20.0f );

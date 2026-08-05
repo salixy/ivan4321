@@ -27,7 +27,7 @@ namespace menu_content
         draw_list->PushClipRect( ImVec2( menu->m_pos.x + 250.0f, menu->m_pos.y ), ImVec2( menu->m_pos.x + menu->m_size.x, menu->m_pos.y + menu->m_size.y ), true );
 
         // Content Area Rectangle Container (#1A1A1A, extending to top, bottom, and right edges of menu)
-        ImVec2 const content_min = ImVec2( menu->m_pos.x + 265.0f + search_slide_x, menu->m_pos.y );
+        ImVec2 const content_min = ImVec2( menu->m_pos.x + 275.0f + search_slide_x, menu->m_pos.y );
         ImVec2 const content_max = ImVec2( menu->m_pos.x + menu->m_size.x, menu->m_pos.y + menu->m_size.y );
 
         draw_list->AddRectFilled( content_min, content_max, IM_COL32( 0x1A, 0x1A, 0x1A, a_255 ), 40.0f );

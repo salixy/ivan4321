@@ -179,7 +179,7 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
 
     float const ease_t = ease_quintic( t_val );
 
-    float const panel_w = lerp_f( 0.0f, 265.0f, ease_t );
+    float const panel_w = lerp_f( 0.0f, 275.0f, ease_t );
     float const panel_h = lerp_f( 275.0f, 641.0f, ease_t );
     float const panel_x = m_pos.x + ( 1.0f - ease_t ) * 35.0f;
     float const panel_y = m_pos.y + ( m_size.y - panel_h ) * 0.5f;

@@ -27,7 +27,7 @@ struct c_menu
     ImVec2 m_center_pos = ImVec2( 0.0f, 0.0f ); // Fixed anchor center point during morphing
     ImVec2 m_size = ImVec2( 805.0f, 275.0f );
     ImVec2 m_login_size = ImVec2( 805.0f, 275.0f );
-    ImVec2 m_main_size  = ImVec2( 1071.0f, 665.0f );
+    ImVec2 m_main_size  = ImVec2( 1101.0f, 665.0f );
     float  m_padding = 16.67f;
     float  m_spacing = 13.33f;
     bool   m_initialized = false;
