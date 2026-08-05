@@ -212,15 +212,15 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
         {
             draw_list->PushClipRect( m_pos, ImVec2( m_pos.x + m_size.x, m_pos.y + m_size.y ), true );
 
-            int const glow_layers = 24;
-            float const max_expand = 32.0f;
+            int const glow_layers = 40;
+            float const max_expand = 75.0f;
 
             for ( int i = glow_layers; i >= 0; --i )
             {
                 float const pass_t = ( float )i / ( float )glow_layers;
                 float const expand = pass_t * max_expand;
                 float const falloff = ( 1.0f - pass_t );
-                int const glow_a = ( int )( falloff * falloff * 45.0f * ease_t );
+                int const glow_a = ( int )( falloff * falloff * 51.0f * ease_t );
 
                 if ( glow_a <= 0 ) continue;
 
