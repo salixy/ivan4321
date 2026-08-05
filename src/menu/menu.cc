@@ -222,7 +222,7 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
         float const start_logo_y = m_pos.y + 36.0f;
 
         float const end_logo_x = panel_x + 20.0f + ( tab_w - logo_w ) * 0.5f;
-        float const end_logo_y = m_pos.y + 25.0f;
+        float const end_logo_y = m_pos.y + 32.0f;
 
         float const curr_logo_x = lerp_f( start_logo_x, end_logo_x, ease_t );
         float const curr_logo_y = lerp_f( start_logo_y, end_logo_y, ease_t );
