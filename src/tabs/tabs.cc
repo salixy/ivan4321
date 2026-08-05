@@ -72,7 +72,7 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
     float const logo_h_offset = ( logo_texture != nullptr && logo_texture->m_loaded ) ? 100.0f : 0.0f;
     float const base_start_y = ( logo_h_offset > 0.0f ) ? ( panel_pos.y + logo_h_offset ) : ( panel_pos.y + 20.0f );
 
-    float const cat_header_h = 28.0f;
+    float const cat_header_h = 38.0f;
     float const item_h = 54.0f;
     float const item_spacing = 3.0f;
     float const cat_spacing = 14.0f;
