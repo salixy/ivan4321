@@ -212,22 +212,28 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
         {
             draw_list->PushClipRect( m_pos, ImVec2( m_pos.x + m_size.x, m_pos.y + m_size.y ), true );
 
-            int const glow_layers = 40;
+            int const glow_layers = 50;
             float const max_expand = 75.0f;
+            float const step = max_expand / ( float )glow_layers;
 
-            for ( int i = glow_layers; i >= 0; --i )
+            // Central core fill capped at exactly 20% opacity (51 / 255)
+            int const core_a = ( int )( 51.0f * ease_t );
+            draw_list->AddRectFilled( pos_logo_min, pos_logo_max, IM_COL32( 158, 149, 217, core_a ), logo_h * 0.5f );
+
+            // Outer concentric rings for smooth gradient blur without alpha accumulation
+            for ( int i = 1; i <= glow_layers; ++i )
             {
+                float const expand = ( float )i * step;
                 float const pass_t = ( float )i / ( float )glow_layers;
-                float const expand = pass_t * max_expand;
                 float const falloff = ( 1.0f - pass_t );
-                int const glow_a = ( int )( falloff * falloff * 51.0f * ease_t );
+                int const ring_a = ( int )( falloff * falloff * 51.0f * ease_t );
 
-                if ( glow_a <= 0 ) continue;
+                if ( ring_a <= 0 ) continue;
 
                 ImVec2 const g_min = ImVec2( pos_logo_min.x - expand, pos_logo_min.y - expand );
                 ImVec2 const g_max = ImVec2( pos_logo_max.x + expand, pos_logo_max.y + expand );
 
-                draw_list->AddRectFilled( g_min, g_max, IM_COL32( 158, 149, 217, glow_a ), ( logo_h + expand * 2.0f ) * 0.5f );
+                draw_list->AddRect( g_min, g_max, IM_COL32( 158, 149, 217, ring_a ), ( logo_h + expand * 2.0f ) * 0.5f, 0, step + 0.6f );
             }
 
             draw_list->PopClipRect( );
