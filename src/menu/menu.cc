@@ -211,11 +211,12 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
         if ( ease_t > 0.001f )
         {
             int const glow_layers = 24;
-            for ( int i = glow_layers; i >= 1; --i )
+            for ( int i = glow_layers; i >= 0; --i )
             {
-                float const expand = ( float )i * 3.5f;
-                float const alpha_factor = ( 1.0f - ( float )i / ( float )glow_layers );
-                int const glow_a = ( int )( alpha_factor * alpha_factor * 17.5f * ease_t );
+                float const pass_t = ( float )i / ( float )glow_layers;
+                float const expand = pass_t * 126.0f;
+                float const alpha_factor = std::pow( 1.0f - pass_t, 1.8f );
+                int const glow_a = ( int )( alpha_factor * 51.0f * ease_t );
 
                 ImVec2 const g_min = ImVec2( pos_logo_min.x - expand, pos_logo_min.y - expand );
                 ImVec2 const g_max = ImVec2( pos_logo_max.x + expand, pos_logo_max.y + expand );
