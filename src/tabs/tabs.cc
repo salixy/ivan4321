@@ -65,9 +65,9 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
     };
 
     float const item_slide_x = ( 1.0f - alpha ) * 35.0f;
-    float const cat_x = panel_pos.x + 22.0f + item_slide_x;
-    float const item_x = panel_pos.x + 22.0f + item_slide_x;
-    float const item_w = 225.0f;
+    float const cat_x = panel_pos.x + 20.0f + item_slide_x;
+    float const item_x = panel_pos.x + 20.0f + item_slide_x;
+    float const item_w = 232.0f;
 
     float const logo_h_offset = ( logo_texture != nullptr && logo_texture->m_loaded ) ? 100.0f : 0.0f;
     float const base_start_y = ( logo_h_offset > 0.0f ) ? ( panel_pos.y + logo_h_offset ) : ( panel_pos.y + 20.0f );
@@ -188,8 +188,8 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
             // Draw subtle whitish background & soft whitish border for active/hovered tab
             if ( h_val > 0.001f )
             {
-                int const bg_alpha = ( int )( lerp_f( 0.0f, 20.0f, h_val ) * alpha );
-                int const border_alpha = ( int )( lerp_f( 0.0f, 35.0f, h_val ) * alpha );
+                int const bg_alpha = ( int )( lerp_f( 0.0f, 10.0f, h_val ) * alpha );
+                int const border_alpha = ( int )( lerp_f( 0.0f, 18.0f, h_val ) * alpha );
 
                 draw_list->AddRectFilled( item_min, item_max, IM_COL32( 255, 255, 255, bg_alpha ), 8.0f );
                 draw_list->AddRect( item_min, item_max, IM_COL32( 255, 255, 255, border_alpha ), 8.0f, 0, 1.0f );
