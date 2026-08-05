@@ -67,13 +67,13 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
     float const item_slide_x = ( 1.0f - alpha ) * 35.0f;
     float const cat_x = panel_pos.x + 20.0f + item_slide_x;
     float const item_x = panel_pos.x + 20.0f + item_slide_x;
-    float const item_w = 232.0f;
+    float const item_w = 205.0f;
 
     float const logo_h_offset = ( logo_texture != nullptr && logo_texture->m_loaded ) ? 100.0f : 0.0f;
     float const base_start_y = ( logo_h_offset > 0.0f ) ? ( panel_pos.y + logo_h_offset ) : ( panel_pos.y + 20.0f );
 
     float const cat_header_h = 24.0f;
-    float const item_h = 36.0f;
+    float const item_h = 54.0f;
     float const item_spacing = 3.0f;
     float const cat_spacing = 14.0f;
 
@@ -205,13 +205,13 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
             if ( icon_font != nullptr )
             {
                 ImVec2 const icon_sz = icon_font->CalcTextSizeA( 18.0f, FLT_MAX, 0.0f, categories[ i ].m_items[ j ].m_icon );
-                ImVec2 const icon_pos = ImVec2( item_min.x + 12.0f, item_min.y + ( item_h - icon_sz.y ) * 0.5f );
+                ImVec2 const icon_pos = ImVec2( item_min.x + 14.0f, item_min.y + ( item_h - icon_sz.y ) * 0.5f );
                 draw_list->AddText( icon_font, 18.0f, icon_pos, item_col, categories[ i ].m_items[ j ].m_icon );
             }
 
             if ( font_medium_32 != nullptr )
             {
-                ImVec2 const text_pos = ImVec2( item_min.x + 38.0f, item_min.y + ( item_h - 25.0f ) * 0.5f );
+                ImVec2 const text_pos = ImVec2( item_min.x + 40.0f, item_min.y + ( item_h - 25.0f ) * 0.5f );
                 draw_list->AddText( font_medium_32, 25.0f, text_pos, item_col, categories[ i ].m_items[ j ].m_name );
             }
 
