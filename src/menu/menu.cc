@@ -194,16 +194,32 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
         float const logo_h = 44.0f;
 
         float const start_logo_x = m_pos.x + 31.0f;
-        float const start_logo_y = m_pos.y + 36.0f;
+        float const start_logo_y = m_pos.y + 41.0f;
 
         float const end_logo_x = panel_x + 20.0f + ( tab_w - logo_w ) * 0.5f;
-        float const end_logo_y = m_pos.y + 32.0f;
+        float const end_logo_y = m_pos.y + 37.0f;
 
         float const curr_logo_x = lerp_f( start_logo_x, end_logo_x, ease_t );
         float const curr_logo_y = lerp_f( start_logo_y, end_logo_y, ease_t );
 
         ImVec2 const pos_logo_min = ImVec2( curr_logo_x, curr_logo_y );
         ImVec2 const pos_logo_max = ImVec2( pos_logo_min.x + logo_w, pos_logo_min.y + logo_h );
+
+        ImDrawList* draw_list = ImGui::GetForegroundDrawList( );
+
+        // Render multi-layer soft blurred glow underneath logo in accent color (158, 149, 217)
+        int const glow_layers = 16;
+        for ( int i = glow_layers; i >= 1; --i )
+        {
+            float const expand = ( float )i * 2.2f;
+            float const alpha_factor = ( 1.0f - ( float )i / ( float )glow_layers );
+            int const glow_a = ( int )( alpha_factor * alpha_factor * 35.0f );
+
+            ImVec2 const g_min = ImVec2( pos_logo_min.x - expand, pos_logo_min.y - expand );
+            ImVec2 const g_max = ImVec2( pos_logo_max.x + expand, pos_logo_max.y + expand );
+
+            draw_list->AddRectFilled( g_min, g_max, IM_COL32( 158, 149, 217, glow_a ), 16.0f + expand );
+        }
 
         int const logo_a = 255;
 
@@ -217,7 +233,6 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
         float const b_right = lerp_f( 27.0f, 217.0f, ease_t );
         ImU32 const col_right = IM_COL32( ( int )r_right, ( int )g_right, ( int )b_right, logo_a );
 
-        ImDrawList* draw_list = ImGui::GetForegroundDrawList( );
         draw_list->PushTextureID( ( ImTextureID )( intptr_t )m_logo_texture.m_texture_id );
         draw_list->PrimReserve( 6, 4 );
         draw_list->PrimWriteIdx( ( ImDrawIdx )draw_list->_VtxCurrentIdx );
