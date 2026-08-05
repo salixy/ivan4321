@@ -8,8 +8,30 @@ include(FetchContent)
 
 option(USE_SDL "Use SDL2 instead of GLFW" ON)
 
+if(WIN32)
+    add_compile_definitions(NOMINMAX WIN32_LEAN_AND_MEAN)
+    if(MSVC)
+        add_compile_options(/W4 /utf-8)
+    endif()
+endif()
+
 if(USE_SDL)
-    find_package(SDL2 REQUIRED)
+    find_package(SDL2 CONFIG QUIET)
+    if(NOT SDL2_FOUND)
+        find_package(SDL2 QUIET)
+    endif()
+    if(NOT SDL2_FOUND)
+        FetchContent_Declare(
+            SDL2
+            GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+            GIT_TAG        release-2.30.10
+        )
+        set(SDL_SHARED OFF CACHE BOOL "" FORCE)
+        set(SDL_STATIC ON CACHE BOOL "" FORCE)
+        set(SDL_TEST OFF CACHE BOOL "" FORCE)
+        FetchContent_MakeAvailable(SDL2)
+        set(SDL2_LIBRARIES SDL2-static)
+    endif()
     add_compile_definitions(USE_SDL)
 else()
     # Fetch GLFW for OpenGL windowing
@@ -79,18 +101,27 @@ target_include_directories(ImGuiApp PRIVATE
     ${IMGUI_DIR}/backends
 )
 
-# Link GLFW/SDL2 and OpenGL
-find_package(OpenGL REQUIRED)
-
-if(USE_SDL)
-    target_include_directories(ImGuiApp PRIVATE ${SDL2_INCLUDE_DIRS})
-    target_link_libraries(ImGuiApp PRIVATE ${SDL2_LIBRARIES} OpenGL::GL freetype)
+# Link GLFW/SDL2, OpenGL, and system libraries
+if(WIN32)
+    if(USE_SDL)
+        target_include_directories(ImGuiApp PRIVATE ${SDL2_INCLUDE_DIRS})
+        target_link_libraries(ImGuiApp PRIVATE ${SDL2_LIBRARIES} opengl32 imm32 winmm dwmapi freetype)
+    else()
+        target_link_libraries(ImGuiApp PRIVATE glfw opengl32 imm32 winmm dwmapi freetype)
+    endif()
 else()
-    target_link_libraries(ImGuiApp PRIVATE glfw OpenGL::GL freetype)
+    find_package(OpenGL REQUIRED)
+    if(USE_SDL)
+        target_include_directories(ImGuiApp PRIVATE ${SDL2_INCLUDE_DIRS})
+        target_link_libraries(ImGuiApp PRIVATE ${SDL2_LIBRARIES} OpenGL::GL freetype)
+    else()
+        target_link_libraries(ImGuiApp PRIVATE glfw OpenGL::GL freetype)
+    endif()
 endif()
 
 target_compile_definitions(ImGuiApp PRIVATE IMGUI_ENABLE_FREETYPE)
 
 # Copy assets to build directory
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/assets DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
 
