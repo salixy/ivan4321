@@ -49,16 +49,16 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
     float const tab_x = panel_pos.x + 20.0f + item_slide_x;
 
     float const logo_h_offset = ( logo_texture != nullptr && logo_texture->m_loaded ) ? 100.0f : 0.0f;
-    float const tab_start_y = ( logo_h_offset > 0.0f ) ? ( panel_pos.y + logo_h_offset ) : ( panel_pos.y + 20.0f );
 
-    float const sub_tab_h = 48.0f;
-    float const sub_tab_spacing = 4.0f;
-    float const total_sub_unit_h = sub_tab_h + sub_tab_spacing; // 52.0f unified height step
+    float const sub_tab_h = 36.0f;
+    float const sub_tab_spacing = 2.0f;
+    float const total_sub_unit_h = sub_tab_h + sub_tab_spacing; // 38.0f unified height step
     float const sub_w = 195.0f;
     float const sub_x = panel_pos.x + 40.0f + item_slide_x;
 
-    // STEP 1: Update expansion animations FIRST so collision pass & render pass use 100% synchronized layout heights!
+    // STEP 1: Update expansion animations & total content height FIRST so collision pass & render pass use 100% synchronized layout heights!
     float sub_expand_vals[ k_tab_count ];
+    float total_content_h = 0.0f;
 
     for ( int i = 0; i < k_tab_count; ++i )
     {
@@ -85,25 +85,50 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
             }
         }
 
-        // Calculate total subtab height using exact unified total_sub_unit_h (36.0f)
+        // Calculate total subtab height
         float const total_sub_height = tabs[ i ].m_sub_count * total_sub_unit_h;
         float const base_speed = 10.0f; // Soft, smooth ~350ms luxury unfolding & closing
-        float const anim_speed = base_speed * ( 108.0f / total_sub_height );
+        float const anim_speed = base_speed * ( 108.0f / ( total_sub_height > 0.0f ? total_sub_height : 108.0f ) );
 
         m_anim_sub_expand[ i ].m_speed = anim_speed;
         m_anim_sub_expand[ i ].set( is_selected ? 1.0f : 0.0f );
         m_anim_sub_expand[ i ].update( delta_time );
 
         sub_expand_vals[ i ] = m_anim_sub_expand[ i ].m_value;
-    }
 
-    // STEP 2: Collision detection pass for click interactions (MUST run using updated sub_expand_vals!)
-    float calc_y = tab_start_y;
-    int clicked_tab_index = -2;
-    int clicked_sub_index = -1;
+        float const smoothed_exp = sub_expand_vals[ i ] * sub_expand_vals[ i ] * ( 3.0f - 2.0f * sub_expand_vals[ i ] );
+        total_content_h += tab_h + ( total_sub_height + 4.0f ) * smoothed_exp + 8.0f;
+    }
 
     bool const is_panel_hovered = ( mouse_pos.x >= p_panel_min.x && mouse_pos.x <= p_panel_min.x + panel_w &&
                                     mouse_pos.y >= p_panel_min.y && mouse_pos.y <= p_panel_min.y + panel_h );
+
+    float const base_start_y = ( logo_h_offset > 0.0f ) ? ( panel_pos.y + logo_h_offset ) : ( panel_pos.y + 20.0f );
+    float const max_visible_h = panel_h - ( logo_h_offset > 0.0f ? logo_h_offset : 20.0f ) - 15.0f;
+    float const max_scroll = std::max( 0.0f, total_content_h - max_visible_h );
+
+    if ( is_panel_hovered && can_interact && io.MouseWheel != 0.0f && max_scroll > 0.0f )
+    {
+        m_scroll_y -= io.MouseWheel * 35.0f;
+        m_scroll_y = std::clamp( m_scroll_y, 0.0f, max_scroll );
+    }
+    else if ( max_scroll <= 0.0f )
+    {
+        m_scroll_y = 0.0f;
+    }
+    m_scroll_y = std::clamp( m_scroll_y, 0.0f, max_scroll );
+
+    m_anim_scroll.m_speed = 16.0f;
+    m_anim_scroll.set( m_scroll_y );
+    m_anim_scroll.update( delta_time );
+
+    float const cur_scroll = m_anim_scroll.m_value;
+    float const tab_start_y = base_start_y - cur_scroll;
+
+    // STEP 2: Collision detection pass for click interactions (MUST run using updated sub_expand_vals & tab_start_y!)
+    float calc_y = tab_start_y;
+    int clicked_tab_index = -2;
+    int clicked_sub_index = -1;
 
     if ( is_panel_hovered )
     {
@@ -297,8 +322,8 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
 
                     if ( font_medium_32 != nullptr )
                     {
-                        ImVec2 const sub_txt_pos = ImVec2( sub_min.x + 18.0f, sub_min.y + ( sub_tab_h - 24.0f ) * 0.5f );
-                        draw_list->AddText( font_medium_32, 24.0f, sub_txt_pos, sub_txt_col, tabs[ i ].m_sub_tabs[ j ].m_name );
+                        ImVec2 const sub_txt_pos = ImVec2( sub_min.x + 18.0f, sub_min.y + ( sub_tab_h - 22.0f ) * 0.5f );
+                        draw_list->AddText( font_medium_32, 22.0f, sub_txt_pos, sub_txt_col, tabs[ i ].m_sub_tabs[ j ].m_name );
                     }
                 }
             }
@@ -309,6 +334,20 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
         }
 
         current_y += 8.0f;
+    }
+
+    // Draw bottom fade-out gradient mask when tabs overflow vertically
+    if ( max_scroll > 0.0f && cur_scroll < max_scroll - 1.0f )
+    {
+        float const fade_h = 50.0f;
+        ImVec2 const fade_min = ImVec2( panel_pos.x, panel_pos.y + panel_h - fade_h );
+        ImVec2 const fade_max = ImVec2( panel_pos.x + panel_w, panel_pos.y + panel_h );
+
+        draw_list->AddRectFilledMultiColor(
+            fade_min, fade_max,
+            IM_COL32( 0x16, 0x16, 0x16, 0 ), IM_COL32( 0x16, 0x16, 0x16, 0 ),
+            IM_COL32( 0x16, 0x16, 0x16, a_255 ), IM_COL32( 0x16, 0x16, 0x16, a_255 )
+        );
     }
 
     draw_list->PopClipRect( );

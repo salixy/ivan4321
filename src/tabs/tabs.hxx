@@ -31,6 +31,9 @@ struct c_tabs
     animation_t m_anim_sub_hover[ k_tab_count ][ 4 ];
     animation_t m_anim_sub_bullet_rel_y[ k_tab_count ]; // Relative local panel Y coordinate
 
+    float       m_scroll_y = 0.0f;
+    animation_t m_anim_scroll;
+
     void render( ImVec2 const& panel_pos, float const panel_w, float const panel_h, float const alpha, float const delta_time, bool const can_interact, ImFont* font_medium_32, ImFont* icon_font, c_texture const* logo_texture = nullptr );
 };
 
