@@ -61,8 +61,8 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
     };
 
     float const item_slide_x = ( 1.0f - alpha ) * 35.0f;
-    float const cat_x = panel_pos.x + 20.0f + item_slide_x;
-    float const item_x = panel_pos.x + 28.0f + item_slide_x;
+    float const cat_x = panel_pos.x + 35.0f + item_slide_x;
+    float const item_x = panel_pos.x + 45.0f + item_slide_x;
 
     float const logo_h_offset = ( logo_texture != nullptr && logo_texture->m_loaded ) ? 100.0f : 0.0f;
     float const base_start_y = ( logo_h_offset > 0.0f ) ? ( panel_pos.y + logo_h_offset ) : ( panel_pos.y + 20.0f );
@@ -154,8 +154,8 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
         // Render Category Header (Icon + Smaller, darker text description)
         ImVec2 const cat_min = ImVec2( cat_x, current_y );
 
-        ImU32 const icon_col = IM_COL32( 115, 110, 130, ( int )( 190.0f * alpha ) );
-        ImU32 const title_col = IM_COL32( 125, 120, 140, ( int )( 210.0f * alpha ) );
+        ImU32 const icon_col = IM_COL32( 65, 60, 75, ( int )( 160.0f * alpha ) );
+        ImU32 const title_col = IM_COL32( 72, 68, 80, ( int )( 170.0f * alpha ) );
 
         if ( icon_font != nullptr )
         {
@@ -198,8 +198,8 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
 
             if ( font_medium_32 != nullptr )
             {
-                ImVec2 const text_pos = ImVec2( item_min.x + 12.0f, item_min.y + ( item_h - 22.0f ) * 0.5f );
-                draw_list->AddText( font_medium_32, 22.0f, text_pos, item_col, categories[ i ].m_items[ j ] );
+                ImVec2 const text_pos = ImVec2( item_min.x + 12.0f, item_min.y + ( item_h - 25.0f ) * 0.5f );
+                draw_list->AddText( font_medium_32, 25.0f, text_pos, item_col, categories[ i ].m_items[ j ] );
             }
 
             current_y += item_h + item_spacing;
