@@ -66,8 +66,9 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
 
     float const item_slide_x = ( 1.0f - alpha ) * 35.0f;
     float const item_x = panel_pos.x + 20.0f + item_slide_x;
-    float const cat_x = item_x + 14.0f;
-    float const item_w = 225.0f;
+    float const item_pad_x = 18.0f;
+    float const cat_x = item_x + item_pad_x;
+    float const item_w = 205.0f;
 
     float const logo_h_offset = ( logo_texture != nullptr && logo_texture->m_loaded ) ? 100.0f : 0.0f;
     float const base_start_y = ( logo_h_offset > 0.0f ) ? ( panel_pos.y + logo_h_offset ) : ( panel_pos.y + 20.0f );
@@ -191,8 +192,8 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
                 int const bg_alpha = ( int )( lerp_f( 0.0f, 10.0f, h_val ) * alpha );
                 int const border_alpha = ( int )( lerp_f( 0.0f, 18.0f, h_val ) * alpha );
 
-                draw_list->AddRectFilled( item_min, item_max, IM_COL32( 255, 255, 255, bg_alpha ), 8.0f );
-                draw_list->AddRect( item_min, item_max, IM_COL32( 255, 255, 255, border_alpha ), 8.0f, 0, 1.0f );
+                draw_list->AddRectFilled( item_min, item_max, IM_COL32( 255, 255, 255, bg_alpha ), 12.0f );
+                draw_list->AddRect( item_min, item_max, IM_COL32( 255, 255, 255, border_alpha ), 12.0f, 0, 1.0f );
             }
 
             // Text & icon color transition from inactive (110, 110, 125) to active accent (158, 149, 217)
@@ -207,13 +208,13 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
             {
                 ImVec2 const icon_sz = icon_font->CalcTextSizeA( 18.0f, FLT_MAX, 0.0f, categories[ i ].m_items[ j ].m_icon );
                 icon_w = icon_sz.x;
-                ImVec2 const icon_pos = ImVec2( item_min.x + 14.0f, item_min.y + ( item_h - icon_sz.y ) * 0.5f );
+                ImVec2 const icon_pos = ImVec2( item_min.x + item_pad_x, item_min.y + ( item_h - icon_sz.y ) * 0.5f );
                 draw_list->AddText( icon_font, 18.0f, icon_pos, item_col, categories[ i ].m_items[ j ].m_icon );
             }
 
             if ( font_medium_32 != nullptr )
             {
-                float const text_x_offset = 14.0f + icon_w + ( icon_w > 0.0f ? 14.0f : 0.0f );
+                float const text_x_offset = item_pad_x + icon_w + ( icon_w > 0.0f ? item_pad_x : 0.0f );
                 ImVec2 const text_pos = ImVec2( item_min.x + text_x_offset, item_min.y + ( item_h - 25.0f ) * 0.5f );
                 draw_list->AddText( font_medium_32, 25.0f, text_pos, item_col, categories[ i ].m_items[ j ].m_name );
             }
