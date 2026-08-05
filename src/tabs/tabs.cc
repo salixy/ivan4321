@@ -4,12 +4,25 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cctype>
+#include <string>
 
 c_tabs g_tabs;
 
 static inline float lerp_f( float a, float b, float t )
 {
     return a + ( b - a ) * t;
+}
+
+static std::string to_upper( char const* str )
+{
+    std::string res;
+    if ( str == nullptr ) return res;
+    for ( char const* p = str; *p != '\0'; ++p )
+    {
+        res += ( char )std::toupper( ( unsigned char )*p );
+    }
+    return res;
 }
 
 void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const panel_h, float const alpha, float const delta_time, bool const can_interact, ImFont* font_medium_32, ImFont* icon_font, c_texture const* logo_texture )
@@ -24,86 +37,58 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
     ImDrawList* draw_list = ImGui::GetForegroundDrawList( );
     int const a_255 = ( int )( 255.0f * alpha );
 
-    // Minimalistic left overlay panel clip rect (background box removed per request)
     ImVec2 const p_panel_min = panel_pos;
     ImVec2 const p_panel_max = ImVec2( panel_pos.x + panel_w, panel_pos.y + panel_h );
 
-    // draw_list->AddRectFilled( p_panel_min, p_panel_max, IM_COL32( 0x1A, 0x1A, 0x1A, a_255 ), 40.0f );
     draw_list->PushClipRect( p_panel_min, p_panel_max, true );
 
-    tab_item_t const tabs[ k_tab_count ] = {
-        { "Combat",   "\xef\x84\xb5", 3, { { "Aim" }, { "Triggerbot" }, { "Accuracy" } } },
-        { "Visuals",  "\xef\x81\xae", 3, { { "ESP" }, { "Effects" }, { "Settings" } } },
-        { "Movement", "\xef\x95\x94", 2, { { "Assistance" }, { "Exploits" } } },
-        { "World",    "\xef\x82\xac", 2, { { "Environment" }, { "Visual Style" } } },
-        { "Menu",     "\xef\x80\x93", 2, { { "Appearance" }, { "Animation" } } },
-        { "Misc",     "\xef\x87\x9e", 2, { { "General" }, { "Utilities" } } },
-        { "Configs",  "\xef\x83\x87", 2, { { "Manager" }, { "Transfer" } } }
+    struct category_t
+    {
+        char const* m_name;
+        char const* m_icon;
+        int         m_item_count;
+        char const* m_items[ 4 ];
     };
 
-    float const tab_w = 225.0f;
-    float const tab_h = 52.0f;
+    category_t const categories[ k_tab_count ] = {
+        { "Combat",   "\xef\x84\xb5", 3, { "Aim", "Triggerbot", "Accuracy" } },
+        { "Visuals",  "\xef\x81\xae", 3, { "ESP", "Effects", "Settings" } },
+        { "Movement", "\xef\x95\x94", 2, { "Assistance", "Exploits" } },
+        { "World",    "\xef\x82\xac", 2, { "Environment", "Visual Style" } },
+        { "Menu",     "\xef\x80\x93", 2, { "Appearance", "Animation" } },
+        { "Misc",     "\xef\x87\x9e", 2, { "General", "Utilities" } },
+        { "Configs",  "\xef\x83\x87", 2, { "Manager", "Transfer" } }
+    };
 
-    // Smooth horizontal entrance and exit slide animation for left tab menu & subtabs (right-to-left)
     float const item_slide_x = ( 1.0f - alpha ) * 35.0f;
-    float const tab_x = panel_pos.x + 20.0f + item_slide_x;
+    float const cat_x = panel_pos.x + 20.0f + item_slide_x;
+    float const item_x = panel_pos.x + 28.0f + item_slide_x;
 
     float const logo_h_offset = ( logo_texture != nullptr && logo_texture->m_loaded ) ? 100.0f : 0.0f;
+    float const base_start_y = ( logo_h_offset > 0.0f ) ? ( panel_pos.y + logo_h_offset ) : ( panel_pos.y + 20.0f );
 
-    float const sub_tab_h = 36.0f;
-    float const sub_tab_spacing = 2.0f;
-    float const total_sub_unit_h = sub_tab_h + sub_tab_spacing; // 38.0f unified height step
-    float const sub_w = 195.0f;
-    float const sub_x = panel_pos.x + 40.0f + item_slide_x;
+    float const cat_header_h = 28.0f;
+    float const item_h = 36.0f;
+    float const item_spacing = 2.0f;
+    float const cat_spacing = 14.0f;
 
-    // STEP 1: Update expansion animations & total content height FIRST so collision pass & render pass use 100% synchronized layout heights!
-    float sub_expand_vals[ k_tab_count ];
+    // Default to first tab (Combat -> Aim) if no tab is selected
+    if ( m_active_tab < 0 || m_active_tab >= k_tab_count )
+    {
+        m_active_tab = 0;
+        m_active_sub_tab[ 0 ] = 0;
+    }
+
+    // STEP 1: Calculate total content height for smooth scrolling
     float total_content_h = 0.0f;
-
     for ( int i = 0; i < k_tab_count; ++i )
     {
-        bool const is_selected = ( m_active_tab == i );
-
-        // When tab starts opening from collapsed state, snap subtab states cleanly so no old hover or bullet values tremble
-        if ( is_selected && m_anim_sub_expand[ i ].m_value < 0.01f )
-        {
-            int const sub_count = tabs[ i ].m_sub_count;
-            if ( m_active_sub_tab[ i ] < 0 || m_active_sub_tab[ i ] >= sub_count )
-            {
-                m_active_sub_tab[ i ] = 0;
-            }
-            int const sel_sub = m_active_sub_tab[ i ];
-
-            m_anim_sub_bullet_rel_y[ i ].m_value = ( float )sel_sub;
-            m_anim_sub_bullet_rel_y[ i ].set( ( float )sel_sub );
-
-            for ( int j = 0; j < sub_count; ++j )
-            {
-                float const target_h = ( j == sel_sub ) ? 1.0f : 0.0f;
-                m_anim_sub_hover[ i ][ j ].m_value = target_h;
-                m_anim_sub_hover[ i ][ j ].set( target_h );
-            }
-        }
-
-        // Calculate total subtab height
-        float const total_sub_height = tabs[ i ].m_sub_count * total_sub_unit_h;
-        float const base_speed = 10.0f; // Soft, smooth ~350ms luxury unfolding & closing
-        float const anim_speed = base_speed * ( 108.0f / ( total_sub_height > 0.0f ? total_sub_height : 108.0f ) );
-
-        m_anim_sub_expand[ i ].m_speed = anim_speed;
-        m_anim_sub_expand[ i ].set( is_selected ? 1.0f : 0.0f );
-        m_anim_sub_expand[ i ].update( delta_time );
-
-        sub_expand_vals[ i ] = m_anim_sub_expand[ i ].m_value;
-
-        float const smoothed_exp = sub_expand_vals[ i ] * sub_expand_vals[ i ] * ( 3.0f - 2.0f * sub_expand_vals[ i ] );
-        total_content_h += tab_h + ( total_sub_height + 4.0f ) * smoothed_exp + 8.0f;
+        total_content_h += cat_header_h + categories[ i ].m_item_count * ( item_h + item_spacing ) + cat_spacing;
     }
 
     bool const is_panel_hovered = ( mouse_pos.x >= p_panel_min.x && mouse_pos.x <= p_panel_min.x + panel_w &&
                                     mouse_pos.y >= p_panel_min.y && mouse_pos.y <= p_panel_min.y + panel_h );
 
-    float const base_start_y = ( logo_h_offset > 0.0f ) ? ( panel_pos.y + logo_h_offset ) : ( panel_pos.y + 20.0f );
     float const max_visible_h = panel_h - ( logo_h_offset > 0.0f ? logo_h_offset : 20.0f ) - 15.0f;
     float const max_scroll = std::max( 0.0f, total_content_h - max_visible_h );
 
@@ -125,215 +110,102 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
     float const cur_scroll = m_anim_scroll.m_value;
     float const tab_start_y = base_start_y - cur_scroll;
 
-    // STEP 2: Collision detection pass for click interactions (MUST run using updated sub_expand_vals & tab_start_y!)
+    // STEP 2: Collision detection pass for clicking tab items under categories
     float calc_y = tab_start_y;
-    int clicked_tab_index = -2;
-    int clicked_sub_index = -1;
-
-    if ( is_panel_hovered )
-    {
-        clicked_tab_index = -1;
-    }
+    int clicked_cat_index = -1;
+    int clicked_item_index = -1;
 
     for ( int i = 0; i < k_tab_count; ++i )
     {
-        int const sub_count = tabs[ i ].m_sub_count;
+        calc_y += cat_header_h; // Skip unclickable Category Header
 
-        float const rounded_calc_y = std::round( calc_y );
-
-        ImVec2 const t_min = ImVec2( tab_x, rounded_calc_y );
-        ImVec2 const t_max = ImVec2( tab_x + tab_w, rounded_calc_y + tab_h );
-
-        if ( mouse_pos.x >= t_min.x && mouse_pos.x <= t_max.x &&
-             mouse_pos.y >= t_min.y && mouse_pos.y <= t_max.y )
+        for ( int j = 0; j < categories[ i ].m_item_count; ++j )
         {
-            if ( io.MouseClicked[ 0 ] && can_interact )
+            ImVec2 const t_min = ImVec2( item_x, calc_y );
+            ImVec2 const t_max = ImVec2( item_x + 200.0f, calc_y + item_h );
+
+            if ( mouse_pos.x >= t_min.x && mouse_pos.x <= t_max.x &&
+                 mouse_pos.y >= t_min.y && mouse_pos.y <= t_max.y )
             {
-                clicked_tab_index = i;
-            }
-        }
-
-        calc_y += tab_h;
-
-        float const expand_val = sub_expand_vals[ i ];
-
-        // Balanced Smoothstep curve (3x^2 - 2x^3) for perfectly smooth opening & closing
-        float const smoothed_expand = expand_val * expand_val * ( 3.0f - 2.0f * expand_val );
-
-        float const sub_start_y = calc_y + 4.0f;
-
-        // Only register subtab clicks when accordion tab is sufficiently expanded (> 0.85f)
-        if ( expand_val > 0.85f )
-        {
-            for ( int j = 0; j < sub_count; ++j )
-            {
-                float const cur_sub_y = sub_start_y + j * total_sub_unit_h;
-                ImVec2 const s_min = ImVec2( sub_x, cur_sub_y );
-                ImVec2 const s_max = ImVec2( sub_x + sub_w, cur_sub_y + sub_tab_h );
-
-                if ( mouse_pos.x >= s_min.x && mouse_pos.x <= s_max.x &&
-                     mouse_pos.y >= s_min.y && mouse_pos.y <= s_max.y + 4.0f )
+                if ( io.MouseClicked[ 0 ] && can_interact )
                 {
-                    if ( io.MouseClicked[ 0 ] && can_interact )
-                    {
-                        clicked_tab_index = i;
-                        clicked_sub_index = j;
-                    }
+                    clicked_cat_index = i;
+                    clicked_item_index = j;
                 }
             }
+
+            calc_y += item_h + item_spacing;
         }
 
-        float const total_sub_h = sub_count * total_sub_unit_h;
-        calc_y += ( total_sub_h + 4.0f ) * smoothed_expand;
-        calc_y += 8.0f;
+        calc_y += cat_spacing;
     }
 
-    // Process tab selection changes before updating animation targets
-    if ( io.MouseClicked[ 0 ] && can_interact )
+    if ( clicked_cat_index >= 0 && clicked_item_index >= 0 )
     {
-        if ( clicked_tab_index >= 0 )
-        {
-            if ( clicked_sub_index >= 0 )
-            {
-                m_active_tab = clicked_tab_index;
-                m_active_sub_tab[ clicked_tab_index ] = clicked_sub_index;
-            }
-            else
-            {
-                if ( m_active_tab == clicked_tab_index )
-                {
-                    m_active_tab = -1;
-                }
-                else
-                {
-                    m_active_tab = clicked_tab_index;
-                }
-            }
-        }
+        m_active_tab = clicked_cat_index;
+        m_active_sub_tab[ clicked_cat_index ] = clicked_item_index;
     }
 
-    // STEP 3: Render pass using steady, perfectly synchronized layout coordinates
+    // STEP 3: Render pass for Category Headers and Tab Items
     float current_y = tab_start_y;
 
     for ( int i = 0; i < k_tab_count; ++i )
     {
-        int const sub_count = tabs[ i ].m_sub_count;
+        // Render Category Header (Icon + Smaller, darker text description)
+        ImVec2 const cat_min = ImVec2( cat_x, current_y );
 
-        float const rounded_current_y = std::round( current_y );
-
-        ImVec2 const tab_min = ImVec2( tab_x, rounded_current_y );
-        ImVec2 const tab_max = ImVec2( tab_x + tab_w, rounded_current_y + tab_h );
-
-        bool const is_parent_hovered = ( mouse_pos.x >= tab_min.x && mouse_pos.x <= tab_max.x &&
-                                         mouse_pos.y >= tab_min.y && mouse_pos.y <= tab_max.y );
-
-        bool const is_selected = ( m_active_tab == i );
-
-        float const expand_val = sub_expand_vals[ i ];
-
-        // Balanced Smoothstep curve (3x^2 - 2x^3)
-        float const smoothed_expand = expand_val * expand_val * ( 3.0f - 2.0f * expand_val );
-
-        // Hover & active animations for parent tab
-        m_anim_tab_hover[ i ].m_speed = 11.0f;
-        m_anim_tab_hover[ i ].set( is_parent_hovered ? 1.0f : 0.0f );
-        m_anim_tab_hover[ i ].update( delta_time );
-
-        m_anim_tab_active[ i ].m_speed = 11.0f;
-        m_anim_tab_active[ i ].set( is_selected ? 1.0f : 0.0f );
-        m_anim_tab_active[ i ].update( delta_time );
-
-        float const h_val = m_anim_tab_hover[ i ].m_value;
-        float const a_val = m_anim_tab_active[ i ].m_value;
-
-        // Text & icon color for parent tab: smoothly transition to accent color when active
-        int const r_col = ( int )lerp_f( 105.0f, 158.0f, a_val );
-        int const g_col = ( int )lerp_f( 105.0f, 149.0f, a_val );
-        int const b_col = ( int )lerp_f( 118.0f, 217.0f, a_val );
-        ImU32 const item_col = IM_COL32( r_col, g_col, b_col, a_255 );
+        ImU32 const icon_col = IM_COL32( 115, 110, 130, ( int )( 190.0f * alpha ) );
+        ImU32 const title_col = IM_COL32( 125, 120, 140, ( int )( 210.0f * alpha ) );
 
         if ( icon_font != nullptr )
         {
-            ImVec2 const icon_sz = icon_font->CalcTextSizeA( 20.0f, FLT_MAX, 0.0f, tabs[ i ].m_icon );
-            ImVec2 const icon_pos = ImVec2( tab_min.x + 18.0f, tab_min.y + ( tab_h - icon_sz.y ) * 0.5f );
-            draw_list->AddText( icon_font, 20.0f, icon_pos, item_col, tabs[ i ].m_icon );
+            ImVec2 const icon_sz = icon_font->CalcTextSizeA( 16.0f, FLT_MAX, 0.0f, categories[ i ].m_icon );
+            ImVec2 const icon_pos = ImVec2( cat_min.x, cat_min.y + ( cat_header_h - icon_sz.y ) * 0.5f );
+            draw_list->AddText( icon_font, 16.0f, icon_pos, icon_col, categories[ i ].m_icon );
         }
 
         if ( font_medium_32 != nullptr )
         {
-            ImVec2 const text_pos = ImVec2( tab_min.x + 55.0f, tab_min.y + ( tab_h - 24.0f ) * 0.5f );
-            draw_list->AddText( font_medium_32, 24.0f, text_pos, item_col, tabs[ i ].m_name );
+            std::string const upper_name = to_upper( categories[ i ].m_name );
+            ImVec2 const text_pos = ImVec2( cat_min.x + 24.0f, cat_min.y + ( cat_header_h - 16.0f ) * 0.5f );
+            draw_list->AddText( font_medium_32, 16.0f, text_pos, title_col, upper_name.c_str( ) );
         }
 
-        current_y += tab_h;
+        current_y += cat_header_h;
 
-        // Render sub-tabs with smooth clipped accordion container
-        if ( expand_val > 0.001f )
+        // Render Tab Items under this Category
+        for ( int j = 0; j < categories[ i ].m_item_count; ++j )
         {
-            float const sub_start_y = current_y + 2.0f;
-            float const total_sub_h = sub_count * total_sub_unit_h;
-            float const anim_container_h = total_sub_h * smoothed_expand;
+            ImVec2 const item_min = ImVec2( item_x, current_y );
+            ImVec2 const item_max = ImVec2( item_x + 200.0f, current_y + item_h );
 
-            // Clamp active sub-tab index to valid range [0, sub_count - 1]
-            if ( m_active_sub_tab[ i ] >= sub_count )
+            bool const is_selected = ( m_active_tab == i && m_active_sub_tab[ i ] == j );
+            bool const is_hovered = ( mouse_pos.x >= item_min.x && mouse_pos.x <= item_max.x &&
+                                      mouse_pos.y >= item_min.y && mouse_pos.y <= item_max.y );
+
+            m_anim_sub_hover[ i ][ j ].m_speed = 12.0f;
+            m_anim_sub_hover[ i ][ j ].set( is_selected ? 1.0f : ( is_hovered ? 0.5f : 0.0f ) );
+            m_anim_sub_hover[ i ][ j ].update( delta_time );
+
+            float const h_val = m_anim_sub_hover[ i ][ j ].m_value;
+
+            // Text color lerp from inactive (110, 110, 125) to active accent (158, 149, 217)
+            float const r_txt = lerp_f( 110.0f, 158.0f, h_val );
+            float const g_txt = lerp_f( 110.0f, 149.0f, h_val );
+            float const b_txt = lerp_f( 125.0f, 217.0f, h_val );
+
+            ImU32 const item_col = IM_COL32( ( int )r_txt, ( int )g_txt, ( int )b_txt, a_255 );
+
+            if ( font_medium_32 != nullptr )
             {
-                m_active_sub_tab[ i ] = std::max( 0, sub_count - 1 );
-            }
-            int const selected_sub = m_active_sub_tab[ i ];
-
-            // Continuous gliding slot animation between sub-tabs
-            m_anim_sub_bullet_rel_y[ i ].m_speed = 14.0f;
-            m_anim_sub_bullet_rel_y[ i ].set( ( float )selected_sub );
-            m_anim_sub_bullet_rel_y[ i ].update( delta_time );
-
-            // Push subtab container clip rect to smoothly uncover subtabs during expansion without overlaps
-            ImVec2 const sub_clip_min = ImVec2( panel_pos.x + 15.0f, sub_start_y - 1.0f );
-            ImVec2 const sub_clip_max = ImVec2( sub_x + sub_w + 10.0f, sub_start_y + anim_container_h );
-
-            draw_list->PushClipRect( sub_clip_min, sub_clip_max, true );
-
-            float const float_offset = 0.0f;
-
-            for ( int j = 0; j < sub_count; ++j )
-            {
-                float const cur_sub_y = sub_start_y + j * total_sub_unit_h + float_offset;
-
-                ImVec2 const sub_min = ImVec2( sub_x, cur_sub_y );
-                ImVec2 const sub_max = ImVec2( sub_x + sub_w, cur_sub_y + sub_tab_h );
-
-                bool const is_sub_selected = ( is_selected && selected_sub == j );
-                float const sub_alpha = alpha * ( is_selected ? std::clamp( smoothed_expand * 1.15f, 0.0f, 1.0f ) : ( m_active_tab >= 0 ? 0.0f : std::clamp( smoothed_expand * 1.15f, 0.0f, 1.0f ) ) );
-
-                if ( sub_alpha > 0.001f )
-                {
-                    int const sub_a255 = ( int )( 255.0f * sub_alpha );
-
-                    // Smoothly animate sub-tab text color between inactive (95, 95, 108) and accent (158, 149, 217)
-                    m_anim_sub_hover[ i ][ j ].m_speed = 12.0f;
-                    m_anim_sub_hover[ i ][ j ].set( is_sub_selected ? 1.0f : 0.0f );
-                    m_anim_sub_hover[ i ][ j ].update( delta_time );
-
-                    float const sub_h_val = m_anim_sub_hover[ i ][ j ].m_value;
-                    float const target_r = lerp_f( 95.0f, 158.0f, sub_h_val );
-                    float const target_g = lerp_f( 95.0f, 149.0f, sub_h_val );
-                    float const target_b = lerp_f( 108.0f, 217.0f, sub_h_val );
-
-                    ImU32 const sub_txt_col = IM_COL32( ( int )target_r, ( int )target_g, ( int )target_b, sub_a255 );
-
-                    if ( font_medium_32 != nullptr )
-                    {
-                        ImVec2 const sub_txt_pos = ImVec2( sub_min.x + 18.0f, sub_min.y + ( sub_tab_h - 22.0f ) * 0.5f );
-                        draw_list->AddText( font_medium_32, 22.0f, sub_txt_pos, sub_txt_col, tabs[ i ].m_sub_tabs[ j ].m_name );
-                    }
-                }
+                ImVec2 const text_pos = ImVec2( item_min.x + 12.0f, item_min.y + ( item_h - 22.0f ) * 0.5f );
+                draw_list->AddText( font_medium_32, 22.0f, text_pos, item_col, categories[ i ].m_items[ j ] );
             }
 
-            draw_list->PopClipRect( );
-
-            current_y += ( total_sub_h + 2.0f ) * smoothed_expand;
+            current_y += item_h + item_spacing;
         }
 
-        current_y += 4.0f;
+        current_y += cat_spacing;
     }
 
     draw_list->PopClipRect( );
