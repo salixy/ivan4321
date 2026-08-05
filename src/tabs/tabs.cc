@@ -59,7 +59,6 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
         { "Combat",   3, { { "Aim", "\xef\x84\xb5" }, { "Triggerbot", "\xef\x80\x91" }, { "Accuracy", "\xef\x87\x9e" } } },
         { "Visuals",  3, { { "ESP", "\xef\x81\xae" }, { "Effects", "\xef\x81\x82" }, { "Settings", "\xef\x80\x93" } } },
         { "Movement", 2, { { "Assistance", "\xef\x95\x94" }, { "Exploits", "\xef\x87\x9b" } } },
-        { "World",    2, { { "Environment", "\xef\x82\xac" }, { "Visual Style", "\xef\x81\xbc" } } },
         { "Menu",     2, { { "Appearance", "\xef\x80\x93" }, { "Animation", "\xef\x85\x90" } } },
         { "Misc",     2, { { "General", "\xef\x80\x93" }, { "Utilities", "\xef\x87\x9e" } } },
         { "Configs",  2, { { "Manager", "\xef\x83\x87" }, { "Transfer", "\xef\x82\xac" } } }
@@ -68,7 +67,7 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
     float const item_slide_x = ( 1.0f - alpha ) * 35.0f;
     float const cat_x = panel_pos.x + 22.0f + item_slide_x;
     float const item_x = panel_pos.x + 22.0f + item_slide_x;
-    float const item_w = 205.0f;
+    float const item_w = 225.0f;
 
     float const logo_h_offset = ( logo_texture != nullptr && logo_texture->m_loaded ) ? 100.0f : 0.0f;
     float const base_start_y = ( logo_h_offset > 0.0f ) ? ( panel_pos.y + logo_h_offset ) : ( panel_pos.y + 20.0f );

@@ -20,10 +20,10 @@ struct c_texture;
 
 struct c_tabs
 {
-    static constexpr int k_tab_count = 7;
+    static constexpr int k_tab_count = 6;
 
     int         m_active_tab = -1; // Closed by default!
-    int         m_active_sub_tab[ k_tab_count ] = { 0, 0, 0, 0, 0, 0, 0 };
+    int         m_active_sub_tab[ k_tab_count ] = { 0, 0, 0, 0, 0, 0 };
 
     animation_t m_anim_tab_hover[ k_tab_count ];
     animation_t m_anim_tab_active[ k_tab_count ];
