@@ -270,7 +270,7 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
         // Render sub-tabs with smooth clipped accordion container
         if ( expand_val > 0.001f )
         {
-            float const sub_start_y = current_y + 4.0f;
+            float const sub_start_y = current_y + 2.0f;
             float const total_sub_h = sub_count * total_sub_unit_h;
             float const anim_container_h = total_sub_h * smoothed_expand;
 
@@ -287,7 +287,7 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
             m_anim_sub_bullet_rel_y[ i ].update( delta_time );
 
             // Push subtab container clip rect to smoothly uncover subtabs during expansion without overlaps
-            ImVec2 const sub_clip_min = ImVec2( panel_pos.x + 15.0f, sub_start_y - 2.0f );
+            ImVec2 const sub_clip_min = ImVec2( panel_pos.x + 15.0f, sub_start_y - 1.0f );
             ImVec2 const sub_clip_max = ImVec2( sub_x + sub_w + 10.0f, sub_start_y + anim_container_h );
 
             draw_list->PushClipRect( sub_clip_min, sub_clip_max, true );
@@ -330,23 +330,37 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
 
             draw_list->PopClipRect( );
 
-            current_y += ( total_sub_h + 4.0f ) * smoothed_expand;
+            current_y += ( total_sub_h + 2.0f ) * smoothed_expand;
         }
 
-        current_y += 8.0f;
+        current_y += 4.0f;
     }
 
-    // Draw bottom fade-out gradient mask when tabs overflow vertically
+    draw_list->PopClipRect( );
+
+    // Draw bottom fade-out gradient mask matching the 40px bottom-left rounded corner of the menu window
     if ( max_scroll > 0.0f && cur_scroll < max_scroll - 1.0f )
     {
-        float const fade_h = 50.0f;
-        ImVec2 const fade_min = ImVec2( panel_pos.x, panel_pos.y + panel_h - fade_h );
-        ImVec2 const fade_max = ImVec2( panel_pos.x + panel_w, panel_pos.y + panel_h );
+        float const total_fade_h = 50.0f;
+        float const gradient_h = 35.0f;
+        float const rounded_h = 15.0f;
 
+        ImVec2 const fade_start = ImVec2( panel_pos.x, panel_pos.y + panel_h - total_fade_h );
+        ImVec2 const grad_end   = ImVec2( panel_pos.x + panel_w, fade_start.y + gradient_h );
+        ImVec2 const fade_end   = ImVec2( panel_pos.x + panel_w, panel_pos.y + panel_h );
+
+        // Upper gradient transition (alpha 0 -> 255)
         draw_list->AddRectFilledMultiColor(
-            fade_min, fade_max,
+            fade_start, grad_end,
             IM_COL32( 0x16, 0x16, 0x16, 0 ), IM_COL32( 0x16, 0x16, 0x16, 0 ),
             IM_COL32( 0x16, 0x16, 0x16, a_255 ), IM_COL32( 0x16, 0x16, 0x16, a_255 )
+        );
+
+        // Lower solid background matching 40px bottom-left window rounding
+        draw_list->AddRectFilled(
+            ImVec2( fade_start.x, grad_end.y ), fade_end,
+            IM_COL32( 0x16, 0x16, 0x16, a_255 ),
+            40.0f, ImDrawFlags_RoundCornersBottomLeft
         );
     }
 
