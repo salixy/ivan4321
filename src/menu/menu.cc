@@ -163,31 +163,6 @@ void c_menu::draw_background( float const delta_time )
 
     // Delegate left branding panel rendering
     menu_login::render_left_panel( m_pos, m_size, ease_t, m_bg_texture, m_cici_texture, m_anim_tg_hover, m_anim_discord_hover, delta_time );
-
-    // Render Character Image (assets/ooo.png) in bottom-right corner of second window
-    if ( ease_t > 0.001f && m_ooo_texture.m_loaded )
-    {
-        float const aspect_ooo = ( float )m_ooo_texture.m_width / ( float )m_ooo_texture.m_height;
-        float const char_h = std::clamp( m_size.y * 0.72f, 350.0f, 480.0f );
-        float const char_w = char_h * aspect_ooo;
-
-        float const char_x = m_pos.x + m_size.x - char_w;
-        float const char_y = m_pos.y + m_size.y - char_h;
-
-        ImVec2 const ooo_min = ImVec2( char_x, char_y );
-        ImVec2 const ooo_max = ImVec2( char_x + char_w, char_y + char_h );
-
-        int const ooo_a = ( int )( ease_t * 128.0f );
-
-        draw_list->PushClipRect( m_pos, ImVec2( m_pos.x + m_size.x, m_pos.y + m_size.y ), true );
-        draw_list->AddImage(
-            ( ImTextureID )( intptr_t )m_ooo_texture.m_texture_id,
-            ooo_min, ooo_max,
-            ImVec2( 0.0f, 0.0f ), ImVec2( 1.0f, 1.0f ),
-            IM_COL32( 255, 255, 255, ooo_a )
-        );
-        draw_list->PopClipRect( );
-    }
 }
 
 void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
@@ -239,7 +214,7 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
 
         float const r_right = lerp_f( 27.0f, 158.0f, ease_t );
         float const g_right = lerp_f( 22.0f, 149.0f, ease_t );
-        float const b_right = lerp_f( 41.0f, 217.0f, ease_t );
+        float const b_right = lerp_f( 27.0f, 217.0f, ease_t );
         ImU32 const col_right = IM_COL32( ( int )r_right, ( int )g_right, ( int )b_right, logo_a );
 
         ImDrawList* draw_list = ImGui::GetForegroundDrawList( );
@@ -318,6 +293,31 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
 
         // Delegate Main Dashboard Content Area rendering
         menu_content::render_dashboard_content( this, tabs_alpha, ease_t, font_medium_32, delta_time );
+
+        // Render Character Image (assets/ooo.png) in bottom-right corner ON TOP of dashboard content background
+        if ( ease_t > 0.001f && m_ooo_texture.m_loaded )
+        {
+            float const aspect_ooo = ( float )m_ooo_texture.m_width / ( float )m_ooo_texture.m_height;
+            float const char_h = std::clamp( m_size.y * 0.72f, 350.0f, 480.0f );
+            float const char_w = char_h * aspect_ooo;
+
+            float const char_x = m_pos.x + m_size.x - char_w;
+            float const char_y = m_pos.y + m_size.y - char_h;
+
+            ImVec2 const ooo_min = ImVec2( char_x, char_y );
+            ImVec2 const ooo_max = ImVec2( char_x + char_w, char_y + char_h );
+
+            int const ooo_a = ( int )( ease_t * 128.0f );
+
+            draw_list->PushClipRect( m_pos, ImVec2( m_pos.x + m_size.x, m_pos.y + m_size.y ), true );
+            draw_list->AddImage(
+                ( ImTextureID )( intptr_t )m_ooo_texture.m_texture_id,
+                ooo_min, ooo_max,
+                ImVec2( 0.0f, 0.0f ), ImVec2( 1.0f, 1.0f ),
+                IM_COL32( 255, 255, 255, ooo_a )
+            );
+            draw_list->PopClipRect( );
+        }
     }
 }
 
