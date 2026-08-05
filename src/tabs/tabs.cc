@@ -283,10 +283,15 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
                 {
                     int const sub_a255 = ( int )( 255.0f * sub_alpha );
 
-                    // Sub-tab text color: accent color when active
-                    float const target_r = is_sub_selected ? 158.0f : 95.0f;
-                    float const target_g = is_sub_selected ? 149.0f : 95.0f;
-                    float const target_b = is_sub_selected ? 217.0f : 108.0f;
+                    // Smoothly animate sub-tab text color between inactive (95, 95, 108) and accent (158, 149, 217)
+                    m_anim_sub_hover[ i ][ j ].m_speed = 12.0f;
+                    m_anim_sub_hover[ i ][ j ].set( is_sub_selected ? 1.0f : 0.0f );
+                    m_anim_sub_hover[ i ][ j ].update( delta_time );
+
+                    float const sub_h_val = m_anim_sub_hover[ i ][ j ].m_value;
+                    float const target_r = lerp_f( 95.0f, 158.0f, sub_h_val );
+                    float const target_g = lerp_f( 95.0f, 149.0f, sub_h_val );
+                    float const target_b = lerp_f( 108.0f, 217.0f, sub_h_val );
 
                     ImU32 const sub_txt_col = IM_COL32( ( int )target_r, ( int )target_g, ( int )target_b, sub_a255 );
 
