@@ -207,18 +207,21 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
 
         ImDrawList* draw_list = ImGui::GetForegroundDrawList( );
 
-        // Render multi-layer soft blurred glow underneath logo in accent color (158, 149, 217)
-        int const glow_layers = 16;
-        for ( int i = glow_layers; i >= 1; --i )
+        // Render multi-layer soft blurred glow underneath logo in accent color (158, 149, 217) - Active only in main dashboard
+        if ( ease_t > 0.001f )
         {
-            float const expand = ( float )i * 2.2f;
-            float const alpha_factor = ( 1.0f - ( float )i / ( float )glow_layers );
-            int const glow_a = ( int )( alpha_factor * alpha_factor * 35.0f );
+            int const glow_layers = 24;
+            for ( int i = glow_layers; i >= 1; --i )
+            {
+                float const expand = ( float )i * 3.5f;
+                float const alpha_factor = ( 1.0f - ( float )i / ( float )glow_layers );
+                int const glow_a = ( int )( alpha_factor * alpha_factor * 17.5f * ease_t );
 
-            ImVec2 const g_min = ImVec2( pos_logo_min.x - expand, pos_logo_min.y - expand );
-            ImVec2 const g_max = ImVec2( pos_logo_max.x + expand, pos_logo_max.y + expand );
+                ImVec2 const g_min = ImVec2( pos_logo_min.x - expand, pos_logo_min.y - expand );
+                ImVec2 const g_max = ImVec2( pos_logo_max.x + expand, pos_logo_max.y + expand );
 
-            draw_list->AddRectFilled( g_min, g_max, IM_COL32( 158, 149, 217, glow_a ), 16.0f + expand );
+                draw_list->AddRectFilled( g_min, g_max, IM_COL32( 158, 149, 217, glow_a ), ( logo_h + expand * 2.0f ) * 0.5f );
+            }
         }
 
         int const logo_a = 255;
