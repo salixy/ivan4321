@@ -210,17 +210,15 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
         // Render multi-layer soft blurred glow underneath logo in accent color (158, 149, 217) - Active only in main dashboard
         if ( ease_t > 0.001f )
         {
-            draw_list->PushClipRect( m_pos, ImVec2( m_pos.x + m_size.x, m_pos.y + m_size.y ), true );
-
-            int const glow_layers = 50;
-            float const max_expand = 75.0f;
+            int const glow_layers = 45;
+            float const max_expand = 36.0f;
             float const step = max_expand / ( float )glow_layers;
 
             // Central core fill capped at exactly 20% opacity (51 / 255)
             int const core_a = ( int )( 51.0f * ease_t );
             draw_list->AddRectFilled( pos_logo_min, pos_logo_max, IM_COL32( 158, 149, 217, core_a ), logo_h * 0.5f );
 
-            // Outer concentric rings for smooth gradient blur without alpha accumulation
+            // Outer concentric rings for smooth 360-degree unclipped halo glow
             for ( int i = 1; i <= glow_layers; ++i )
             {
                 float const expand = ( float )i * step;
@@ -235,8 +233,6 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
 
                 draw_list->AddRect( g_min, g_max, IM_COL32( 158, 149, 217, ring_a ), ( logo_h + expand * 2.0f ) * 0.5f, 0, step + 0.6f );
             }
-
-            draw_list->PopClipRect( );
         }
 
         int const logo_a = 255;
