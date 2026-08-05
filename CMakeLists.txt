@@ -58,6 +58,8 @@ set(APP_SOURCES
     src/main.cc
     src/render/render.cc
     src/menu/menu.cc
+    src/menu/menu_login.cc
+    src/menu/menu_content.cc
     src/motion/motion.cc
     src/button/button.cc
     src/input/input.cc
