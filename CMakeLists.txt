@@ -32,7 +32,7 @@ if(USE_SDL)
         FetchContent_MakeAvailable(SDL2)
         set(SDL2_LIBRARIES SDL2-static)
     endif()
-    add_compile_definitions(USE_SDL)
+    add_compile_definitions(USE_SDL SDL_MAIN_HANDLED)
 else()
     # Fetch GLFW for OpenGL windowing
     FetchContent_Declare(
