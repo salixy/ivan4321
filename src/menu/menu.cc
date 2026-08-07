@@ -207,31 +207,6 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
 
         ImDrawList* draw_list = ImGui::GetForegroundDrawList( );
 
-        // Render soft atmospheric blurred glow underneath logo in accent color (158, 149, 217) - Active only in main dashboard
-        if ( ease_t > 0.001f )
-        {
-            int const glow_layers = 50;
-            float const max_expand = 64.0f;
-            float const step = max_expand / ( float )glow_layers;
-
-            // Render soft multi-layered expanded filled rounds from outside inward to prevent hard box edges
-            for ( int i = glow_layers; i >= 1; --i )
-            {
-                float const expand = ( float )i * step;
-                float const pass_t = ( float )i / ( float )glow_layers;
-                float const falloff = ( 1.0f - pass_t );
-                int const glow_a = ( int )( falloff * falloff * 38.0f * ease_t );
-
-                if ( glow_a <= 0 ) continue;
-
-                ImVec2 const g_min = ImVec2( pos_logo_min.x - expand, pos_logo_min.y - expand );
-                ImVec2 const g_max = ImVec2( pos_logo_max.x + expand, pos_logo_max.y + expand );
-                float const glow_rounding = ( logo_h + expand * 2.0f ) * 0.5f;
-
-                draw_list->AddRectFilled( g_min, g_max, IM_COL32( 158, 149, 217, glow_a ), glow_rounding );
-            }
-        }
-
         int const logo_a = 255;
 
         float const r_left = lerp_f( 27.0f, 255.0f, ease_t );
