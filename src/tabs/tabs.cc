@@ -70,12 +70,13 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
 
     m_current_panel_w = lerp_f( panel_w, 78.0f * ( panel_w / 275.0f ), collapse_t );
 
-    // Render Collapse / Expand Toggle Button in panel header
+    // Render Collapse / Expand Toggle Button at top-right edge of the window
     if ( can_interact && alpha > 0.5f )
     {
-        ImVec2 const toggle_sz = ImVec2( 22.0f, 22.0f );
-        float const toggle_x = lerp_f( panel_pos.x + m_current_panel_w - 32.0f, panel_pos.x + ( m_current_panel_w - toggle_sz.x ) * 0.5f, collapse_t );
-        float const toggle_y = panel_pos.y + lerp_f( 22.0f, 65.0f, collapse_t );
+        ImVec2 const toggle_sz = ImVec2( 26.0f, 26.0f );
+        float const window_total_w = 1101.0f - 197.0f * collapse_t;
+        float const toggle_x = panel_pos.x + window_total_w - 48.0f;
+        float const toggle_y = panel_pos.y + 20.0f;
         ImVec2 const toggle_min = ImVec2( toggle_x, toggle_y );
         ImVec2 const toggle_max = ImVec2( toggle_min.x + toggle_sz.x, toggle_min.y + toggle_sz.y );
 
@@ -87,17 +88,18 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
         m_anim_toggle_hover.update( delta_time );
 
         float const t_h_val = m_anim_toggle_hover.m_value;
-        int const t_bg_a = ( int )( lerp_f( 20.0f, 60.0f, t_h_val ) * alpha );
-        int const t_txt_a = ( int )( lerp_f( 140.0f, 255.0f, t_h_val ) * alpha );
+        int const t_bg_a = ( int )( lerp_f( 25.0f, 75.0f, t_h_val ) * alpha );
+        int const t_txt_a = ( int )( lerp_f( 160.0f, 255.0f, t_h_val ) * alpha );
 
-        draw_list->AddRectFilled( toggle_min, toggle_max, IM_COL32( 255, 255, 255, t_bg_a ), 6.0f );
+        draw_list->AddRectFilled( toggle_min, toggle_max, IM_COL32( 255, 255, 255, t_bg_a ), 8.0f );
+        draw_list->AddRect( toggle_min, toggle_max, IM_COL32( 255, 255, 255, ( int )( 30.0f * alpha ) ), 8.0f, 0, 1.0f );
 
         char const* toggle_icon = m_collapsed ? "\xef\x81\x94" : "\xef\x81\x93"; // fa-chevron-right / fa-chevron-left
         if ( icon_font != nullptr )
         {
-            ImVec2 const t_icon_sz = icon_font->CalcTextSizeA( 13.0f, FLT_MAX, 0.0f, toggle_icon );
+            ImVec2 const t_icon_sz = icon_font->CalcTextSizeA( 14.0f, FLT_MAX, 0.0f, toggle_icon );
             ImVec2 const t_icon_pos = ImVec2( toggle_min.x + ( toggle_sz.x - t_icon_sz.x ) * 0.5f, toggle_min.y + ( toggle_sz.y - t_icon_sz.y ) * 0.5f );
-            draw_list->AddText( icon_font, 13.0f, t_icon_pos, IM_COL32( 200, 200, 220, t_txt_a ), toggle_icon );
+            draw_list->AddText( icon_font, 14.0f, t_icon_pos, IM_COL32( 220, 220, 240, t_txt_a ), toggle_icon );
         }
 
         if ( is_t_hovered && io.MouseClicked[ 0 ] )

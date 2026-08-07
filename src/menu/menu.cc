@@ -72,7 +72,11 @@ void c_menu::draw_background( float const delta_time )
 
     float const ease_t = ease_quintic( t_val );
 
-    m_size.x = lerp_f( m_login_size.x, m_main_size.x, ease_t );
+    float const collapse_t = g_tabs.m_anim_collapse.m_value;
+    float const collapse_shift_x = 197.0f * collapse_t * ease_t;
+    float const current_main_w = 1101.0f - collapse_shift_x;
+
+    m_size.x = lerp_f( m_login_size.x, current_main_w, ease_t );
     m_size.y = lerp_f( m_login_size.y, m_main_size.y, ease_t );
 
     if ( !m_initialized )
@@ -97,32 +101,35 @@ void c_menu::draw_background( float const delta_time )
         }
     }
 
+    // Effective rendering position (contracts from left side)
+    ImVec2 const effective_pos = ImVec2( m_pos.x + collapse_shift_x, m_pos.y );
+
     // Window dragging logic
-    float const input_x = m_pos.x + 805.0f - m_padding - m_input_username.m_size.x;
-    float const input_y = m_pos.y + m_padding + 2.67f;
+    float const input_x = effective_pos.x + 805.0f - m_padding - m_input_username.m_size.x;
+    float const input_y = effective_pos.y + m_padding + 2.67f;
 
     ImVec2 const preview_input1 = ImVec2( input_x, input_y );
     ImVec2 const preview_input2 = ImVec2( input_x, preview_input1.y + m_input_username.m_size.y + m_spacing );
     ImVec2 const preview_button = ImVec2( input_x, preview_input2.y + m_input_password.m_size.y + m_spacing );
 
-    float const panel_x_calc = m_pos.x - 30.0f * ease_t;
-    float const panel_y_calc = m_pos.y + ( m_size.y - 641.0f ) * 0.5f;
+    float const panel_x_calc = effective_pos.x - 30.0f * ease_t;
+    float const panel_y_calc = effective_pos.y + ( m_size.y - 641.0f ) * 0.5f;
 
     float const search_x_calc = panel_x_calc + 280.0f + 21.0f;
-    float const search_y_calc = m_pos.y + 11.0f;
+    float const search_y_calc = effective_pos.y + 11.0f;
     ImVec2 const preview_search = ImVec2( search_x_calc, search_y_calc );
     ImVec2 const search_size = ImVec2( 280.0f, 58.0f );
 
     ImVec2 const preview_tabs = ImVec2( panel_x_calc + 20.0f, panel_y_calc + 80.0f );
     ImVec2 const tabs_area_size = ImVec2( 240.0f, 5 * 54.0f );
 
-    bool const is_hovered = ( mouse_pos.x >= m_pos.x - 30.0f && mouse_pos.x <= m_pos.x + m_size.x &&
-                               mouse_pos.y >= m_pos.y && mouse_pos.y <= m_pos.y + m_size.y );
+    bool const is_hovered = ( mouse_pos.x >= effective_pos.x - 30.0f && mouse_pos.x <= effective_pos.x + m_size.x &&
+                               mouse_pos.y >= effective_pos.y && mouse_pos.y <= effective_pos.y + m_size.y );
 
-    bool const in_dashboard_content = ( mouse_pos.x >= m_pos.x + 250.0f &&
-                                         mouse_pos.x <= m_pos.x + m_size.x + 50.0f &&
-                                         mouse_pos.y >= m_pos.y + 75.0f &&
-                                         mouse_pos.y <= m_pos.y + m_size.y + 150.0f );
+    bool const in_dashboard_content = ( mouse_pos.x >= effective_pos.x + 250.0f &&
+                                         mouse_pos.x <= effective_pos.x + m_size.x + 50.0f &&
+                                         mouse_pos.y >= effective_pos.y + 75.0f &&
+                                         mouse_pos.y <= effective_pos.y + m_size.y + 150.0f );
 
     bool const over_interactive = ( ( m_state == menu_state_t::LOGIN ) &&
                                      ( in_rect( mouse_pos, preview_input1, m_input_username.m_size ) ||
@@ -139,14 +146,14 @@ void c_menu::draw_background( float const delta_time )
     if ( is_hovered && io.MouseClicked[ 0 ] && !over_interactive )
     {
         m_dragging = true;
-        m_drag_offset = ImVec2( mouse_pos.x - m_pos.x, mouse_pos.y - m_pos.y );
+        m_drag_offset = ImVec2( mouse_pos.x - effective_pos.x, mouse_pos.y - effective_pos.y );
     }
 
     if ( m_dragging )
     {
         if ( mouse_down )
         {
-            m_pos = ImVec2( mouse_pos.x - m_drag_offset.x, mouse_pos.y - m_drag_offset.y );
+            m_pos = ImVec2( mouse_pos.x - m_drag_offset.x - collapse_shift_x, mouse_pos.y - m_drag_offset.y );
         }
         else
         {
@@ -159,10 +166,10 @@ void c_menu::draw_background( float const delta_time )
     float const rounding = 40.0f;
 
     // Main rounded background container (#161616)
-    draw_list->AddRectFilled( m_pos, ImVec2( m_pos.x + m_size.x, m_pos.y + m_size.y ), bg_color, rounding );
+    draw_list->AddRectFilled( effective_pos, ImVec2( effective_pos.x + m_size.x, effective_pos.y + m_size.y ), bg_color, rounding );
 
     // Delegate left branding panel rendering
-    menu_login::render_left_panel( m_pos, m_size, ease_t, m_bg_texture, m_cici_texture, m_anim_tg_hover, m_anim_discord_hover, delta_time );
+    menu_login::render_left_panel( effective_pos, m_size, ease_t, m_bg_texture, m_cici_texture, m_anim_tg_hover, m_anim_discord_hover, delta_time );
 }
 
 void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
@@ -178,28 +185,30 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
     };
 
     float const ease_t = ease_quintic( t_val );
+    float const collapse_val = g_tabs.m_anim_collapse.m_value;
+    float const collapse_shift_x = 197.0f * collapse_val * ease_t;
+    ImVec2 const effective_pos = ImVec2( m_pos.x + collapse_shift_x, m_pos.y );
 
     float const panel_w = lerp_f( 0.0f, 275.0f, ease_t );
     float const panel_h = lerp_f( 275.0f, 641.0f, ease_t );
-    float const panel_x = m_pos.x + ( 1.0f - ease_t ) * 35.0f;
-    float const panel_y = m_pos.y + ( m_size.y - panel_h ) * 0.5f;
+    float const panel_x = effective_pos.x + ( 1.0f - ease_t ) * 35.0f;
+    float const panel_y = effective_pos.y + ( m_size.y - panel_h ) * 0.5f;
 
     float const tabs_alpha = ease_t;
 
     // Render Logo with smooth position slide & gradient color transition
     if ( m_logo_texture.m_loaded )
     {
-        float const collapse_val = g_tabs.m_anim_collapse.m_value;
         float const curr_panel_w = g_tabs.m_current_panel_w;
 
         float const logo_w = lerp_f( 68.0f, 42.0f, collapse_val );
         float const logo_h = lerp_f( 44.0f, 27.0f, collapse_val );
 
-        float const start_logo_x = m_pos.x + 31.0f;
-        float const start_logo_y = m_pos.y + 41.0f;
+        float const start_logo_x = effective_pos.x + 31.0f;
+        float const start_logo_y = effective_pos.y + 41.0f;
 
         float const end_logo_x = panel_x + ( curr_panel_w - logo_w ) * 0.5f;
-        float const end_logo_y = m_pos.y + lerp_f( 37.0f, 28.0f, collapse_val );
+        float const end_logo_y = effective_pos.y + lerp_f( 37.0f, 28.0f, collapse_val );
 
         float const curr_logo_x = lerp_f( start_logo_x, end_logo_x, ease_t );
         float const curr_logo_y = lerp_f( start_logo_y, end_logo_y, ease_t );
@@ -264,7 +273,7 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
 
         // Draw Back Arrow Button in bottom-right corner of the window
         ImVec2 const back_icon_size = ImVec2( 28.0f, 28.0f );
-        ImVec2 const back_icon_pos = ImVec2( m_pos.x + m_size.x - back_icon_size.x - 24.0f, m_pos.y + m_size.y - back_icon_size.y - 24.0f );
+        ImVec2 const back_icon_pos = ImVec2( effective_pos.x + m_size.x - back_icon_size.x - 24.0f, effective_pos.y + m_size.y - back_icon_size.y - 24.0f );
 
         bool const is_back_hovered = ( mouse_pos.x >= back_icon_pos.x && mouse_pos.x <= back_icon_pos.x + back_icon_size.x &&
                                       mouse_pos.y >= back_icon_pos.y && mouse_pos.y <= back_icon_pos.y + back_icon_size.y );
