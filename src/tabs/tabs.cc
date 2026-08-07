@@ -56,7 +56,7 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
     category_t const categories[ k_tab_count ] = {
         { "Combat",   3, { { "Aim", "\xef\x81\x9b" }, { "Triggerbot", "\xef\x83\xa7" }, { "Accuracy", "\xef\x85\x80" } } },
         { "Visuals",  3, { { "ESP", "\xef\x81\xae" }, { "Effects", "\xef\x80\x85" }, { "Settings", "\xef\x87\x9e" } } },
-        { "Movement", 2, { { "Assistance", "\xef\x86\x97" }, { "Exploits", "\xef\x81\xa8" } } },
+        { "Movement", 2, { { "Assistance", "\xef\x95\x94" }, { "Exploits", "\xef\x87\x9b" } } },
         { "Menu",     2, { { "Appearance", "\xef\x84\x88" }, { "Animation", "\xef\x85\x84" } } },
         { "Misc",     2, { { "General", "\xef\x80\x93" }, { "Utilities", "\xef\x82\xad" } } },
         { "Configs",  2, { { "Manager", "\xef\x81\xbc" }, { "Transfer", "\xef\x85\x8d" } } }
