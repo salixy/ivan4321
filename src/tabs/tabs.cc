@@ -54,12 +54,12 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
     };
 
     category_t const categories[ k_tab_count ] = {
-        { "Combat",   3, { { "Aim", "\xef\x84\xb5" }, { "Triggerbot", "\xef\x80\x91" }, { "Accuracy", "\xef\x87\x9e" } } },
-        { "Visuals",  3, { { "ESP", "\xef\x81\xae" }, { "Effects", "\xef\x81\x82" }, { "Settings", "\xef\x80\x93" } } },
-        { "Movement", 2, { { "Assistance", "\xef\x95\x94" }, { "Exploits", "\xef\x87\x9b" } } },
-        { "Menu",     2, { { "Appearance", "\xef\x80\x93" }, { "Animation", "\xef\x85\x90" } } },
-        { "Misc",     2, { { "General", "\xef\x80\x93" }, { "Utilities", "\xef\x87\x9e" } } },
-        { "Configs",  2, { { "Manager", "\xef\x83\x87" }, { "Transfer", "\xef\x82\xac" } } }
+        { "Combat",   3, { { "Aim", "\xef\x81\x9b" }, { "Triggerbot", "\xef\x83\xa7" }, { "Accuracy", "\xef\x8f\xbd" } } },
+        { "Visuals",  3, { { "ESP", "\xef\x81\xae" }, { "Effects", "\xef\x83\xd0" }, { "Settings", "\xef\x87\x9e" } } },
+        { "Movement", 2, { { "Assistance", "\xef\x9c\x8c" }, { "Exploits", "\xef\x86\x88" } } },
+        { "Menu",     2, { { "Appearance", "\xef\x94\xb9" }, { "Animation", "\xef\x85\x84" } } },
+        { "Misc",     2, { { "General", "\xef\x80\x93" }, { "Utilities", "\xef\x9f\x93" } } },
+        { "Configs",  2, { { "Manager", "\xef\x81\xbc" }, { "Transfer", "\xef\x89\xac" } } }
     };
 
     float const item_slide_x = ( 1.0f - alpha ) * 35.0f;
