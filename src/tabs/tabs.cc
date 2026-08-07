@@ -231,22 +231,39 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
     // Render smooth top and bottom vertical gradient fade overlays (#161616 panel background)
     if ( a_255 > 0 )
     {
-        ImU32 const bg_full = IM_COL32( 0x16, 0x16, 0x16, a_255 );
-        ImU32 const bg_zero = IM_COL32( 0x16, 0x16, 0x16, 0 );
+        float const top_fade_factor = std::clamp( cur_scroll / 22.0f, 0.0f, 1.0f );
+        float const bottom_fade_factor = ( max_scroll > 1.0f ) ? std::clamp( ( max_scroll - cur_scroll ) / 22.0f, 0.0f, 1.0f ) : 0.0f;
 
-        // Top fade-in gradient overlay
-        draw_list->AddRectFilledMultiColor(
-            ImVec2( p_panel_min.x, scroll_clip_min_y ),
-            ImVec2( p_panel_max.x, scroll_clip_min_y + 22.0f ),
-            bg_full, bg_full, bg_zero, bg_zero
-        );
+        float const fade_min_x = item_x;
+        float const fade_max_x = item_x + item_w;
 
-        // Bottom fade-out gradient overlay
-        draw_list->AddRectFilledMultiColor(
-            ImVec2( p_panel_min.x, scroll_clip_max_y - 22.0f ),
-            ImVec2( p_panel_max.x, scroll_clip_max_y ),
-            bg_zero, bg_zero, bg_full, bg_full
-        );
+        // Top fade-in gradient overlay (active only when scrolled down from top)
+        if ( top_fade_factor > 0.001f )
+        {
+            int const top_a = ( int )( ( float )a_255 * top_fade_factor );
+            ImU32 const top_full = IM_COL32( 0x16, 0x16, 0x16, top_a );
+            ImU32 const top_zero = IM_COL32( 0x16, 0x16, 0x16, 0 );
+
+            draw_list->AddRectFilledMultiColor(
+                ImVec2( fade_min_x, scroll_clip_min_y ),
+                ImVec2( fade_max_x, scroll_clip_min_y + 22.0f ),
+                top_full, top_full, top_zero, top_zero
+            );
+        }
+
+        // Bottom fade-out gradient overlay (active only when content remains below)
+        if ( bottom_fade_factor > 0.001f )
+        {
+            int const bot_a = ( int )( ( float )a_255 * bottom_fade_factor );
+            ImU32 const bot_full = IM_COL32( 0x16, 0x16, 0x16, bot_a );
+            ImU32 const bot_zero = IM_COL32( 0x16, 0x16, 0x16, 0 );
+
+            draw_list->AddRectFilledMultiColor(
+                ImVec2( fade_min_x, scroll_clip_max_y - 22.0f ),
+                ImVec2( fade_max_x, scroll_clip_max_y ),
+                bot_zero, bot_zero, bot_full, bot_full
+            );
+        }
     }
 
     draw_list->PopClipRect( );
