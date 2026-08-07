@@ -271,8 +271,36 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
         ImDrawList* draw_list = ImGui::GetForegroundDrawList( );
         int const a_255 = ( int )( 255.0f * tabs_alpha );
 
-        // Draw Back Arrow Button in bottom-right corner of the window
-        ImVec2 const back_icon_size = ImVec2( 28.0f, 28.0f );
+        // Delegate Main Dashboard Content Area rendering
+        menu_content::render_dashboard_content( this, tabs_alpha, ease_t, font_medium_32, delta_time );
+
+        // Render Character Image (assets/ooo.png) in bottom-right corner ON TOP of dashboard content background
+        if ( ease_t > 0.001f && m_ooo_texture.m_loaded )
+        {
+            float const aspect_ooo = ( float )m_ooo_texture.m_width / ( float )m_ooo_texture.m_height;
+            float const char_h = std::clamp( m_size.y * 0.72f, 350.0f, 480.0f );
+            float const char_w = char_h * aspect_ooo;
+
+            float const char_x = effective_pos.x + m_size.x - char_w;
+            float const char_y = effective_pos.y + m_size.y - char_h;
+
+            ImVec2 const ooo_min = ImVec2( char_x, char_y );
+            ImVec2 const ooo_max = ImVec2( char_x + char_w, char_y + char_h );
+
+            int const ooo_a = ( int )( ease_t * 128.0f );
+
+            draw_list->PushClipRect( effective_pos, ImVec2( effective_pos.x + m_size.x, effective_pos.y + m_size.y ), true );
+            draw_list->AddImage(
+                ( ImTextureID )( intptr_t )m_ooo_texture.m_texture_id,
+                ooo_min, ooo_max,
+                ImVec2( 0.0f, 0.0f ), ImVec2( 1.0f, 1.0f ),
+                IM_COL32( 255, 255, 255, ooo_a )
+            );
+            draw_list->PopClipRect( );
+        }
+
+        // Draw Back Arrow Button in bottom-right corner of the window (rendered in foreground above all content)
+        ImVec2 const back_icon_size = ImVec2( 32.0f, 32.0f );
         ImVec2 const back_icon_pos = ImVec2( effective_pos.x + m_size.x - back_icon_size.x - 24.0f, effective_pos.y + m_size.y - back_icon_size.y - 24.0f );
 
         bool const is_back_hovered = ( mouse_pos.x >= back_icon_pos.x && mouse_pos.x <= back_icon_pos.x + back_icon_size.x &&
@@ -283,10 +311,16 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
         m_anim_back_hover.update( delta_time );
 
         float const back_h_val = m_anim_back_hover.m_value;
+        int const b_bg_a = ( int )( lerp_f( 220.0f, 255.0f, back_h_val ) * tabs_alpha );
+        int const b_border_a = ( int )( lerp_f( 60.0f, 200.0f, back_h_val ) * tabs_alpha );
+
+        draw_list->AddRectFilled( back_icon_pos, ImVec2( back_icon_pos.x + back_icon_size.x, back_icon_pos.y + back_icon_size.y ), IM_COL32( 26, 24, 34, b_bg_a ), 16.0f );
+        draw_list->AddRect( back_icon_pos, ImVec2( back_icon_pos.x + back_icon_size.x, back_icon_pos.y + back_icon_size.y ), IM_COL32( 158, 149, 217, b_border_a ), 16.0f, 0, 1.2f );
+
         ImU32 const back_icon_col = IM_COL32(
-            ( int )lerp_f( 0x8E, 0xFF, back_h_val ),
-            ( int )lerp_f( 0x8E, 0xFF, back_h_val ),
-            ( int )lerp_f( 0x93, 0xFF, back_h_val ),
+            ( int )lerp_f( 0x9E, 0xFF, back_h_val ),
+            ( int )lerp_f( 0x95, 0xFF, back_h_val ),
+            ( int )lerp_f( 0xD9, 0xFF, back_h_val ),
             a_255
         );
 
@@ -301,34 +335,6 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
             m_center_pos = ImVec2( m_pos.x + m_size.x * 0.5f, m_pos.y + m_size.y * 0.5f );
             m_state = menu_state_t::TRANSITION_TO_LOGIN;
             g_tabs.m_active_tab = -1;
-        }
-
-        // Delegate Main Dashboard Content Area rendering
-        menu_content::render_dashboard_content( this, tabs_alpha, ease_t, font_medium_32, delta_time );
-
-        // Render Character Image (assets/ooo.png) in bottom-right corner ON TOP of dashboard content background
-        if ( ease_t > 0.001f && m_ooo_texture.m_loaded )
-        {
-            float const aspect_ooo = ( float )m_ooo_texture.m_width / ( float )m_ooo_texture.m_height;
-            float const char_h = std::clamp( m_size.y * 0.72f, 350.0f, 480.0f );
-            float const char_w = char_h * aspect_ooo;
-
-            float const char_x = m_pos.x + m_size.x - char_w;
-            float const char_y = m_pos.y + m_size.y - char_h;
-
-            ImVec2 const ooo_min = ImVec2( char_x, char_y );
-            ImVec2 const ooo_max = ImVec2( char_x + char_w, char_y + char_h );
-
-            int const ooo_a = ( int )( ease_t * 128.0f );
-
-            draw_list->PushClipRect( m_pos, ImVec2( m_pos.x + m_size.x, m_pos.y + m_size.y ), true );
-            draw_list->AddImage(
-                ( ImTextureID )( intptr_t )m_ooo_texture.m_texture_id,
-                ooo_min, ooo_max,
-                ImVec2( 0.0f, 0.0f ), ImVec2( 1.0f, 1.0f ),
-                IM_COL32( 255, 255, 255, ooo_a )
-            );
-            draw_list->PopClipRect( );
         }
     }
 }
