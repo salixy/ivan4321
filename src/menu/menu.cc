@@ -207,31 +207,28 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
 
         ImDrawList* draw_list = ImGui::GetForegroundDrawList( );
 
-        // Render multi-layer soft blurred glow underneath logo in accent color (158, 149, 217) - Active only in main dashboard
+        // Render soft atmospheric blurred glow underneath logo in accent color (158, 149, 217) - Active only in main dashboard
         if ( ease_t > 0.001f )
         {
-            int const glow_layers = 45;
-            float const max_expand = 36.0f;
+            int const glow_layers = 50;
+            float const max_expand = 64.0f;
             float const step = max_expand / ( float )glow_layers;
 
-            // Central core fill capped at exactly 20% opacity (51 / 255)
-            int const core_a = ( int )( 51.0f * ease_t );
-            draw_list->AddRectFilled( pos_logo_min, pos_logo_max, IM_COL32( 158, 149, 217, core_a ), logo_h * 0.5f );
-
-            // Outer concentric rings for smooth 360-degree unclipped halo glow
-            for ( int i = 1; i <= glow_layers; ++i )
+            // Render soft multi-layered expanded filled rounds from outside inward to prevent hard box edges
+            for ( int i = glow_layers; i >= 1; --i )
             {
                 float const expand = ( float )i * step;
                 float const pass_t = ( float )i / ( float )glow_layers;
                 float const falloff = ( 1.0f - pass_t );
-                int const ring_a = ( int )( falloff * falloff * 51.0f * ease_t );
+                int const glow_a = ( int )( falloff * falloff * 38.0f * ease_t );
 
-                if ( ring_a <= 0 ) continue;
+                if ( glow_a <= 0 ) continue;
 
                 ImVec2 const g_min = ImVec2( pos_logo_min.x - expand, pos_logo_min.y - expand );
                 ImVec2 const g_max = ImVec2( pos_logo_max.x + expand, pos_logo_max.y + expand );
+                float const glow_rounding = ( logo_h + expand * 2.0f ) * 0.5f;
 
-                draw_list->AddRect( g_min, g_max, IM_COL32( 158, 149, 217, ring_a ), ( logo_h + expand * 2.0f ) * 0.5f, 0, step + 0.6f );
+                draw_list->AddRectFilled( g_min, g_max, IM_COL32( 158, 149, 217, glow_a ), glow_rounding );
             }
         }
 
