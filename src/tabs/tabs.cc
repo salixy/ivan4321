@@ -40,8 +40,6 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
     ImVec2 const p_panel_min = panel_pos;
     ImVec2 const p_panel_max = ImVec2( panel_pos.x + panel_w, panel_pos.y + panel_h );
 
-    draw_list->PushClipRect( p_panel_min, p_panel_max, true );
-
     struct tab_child_t
     {
         char const* m_name;
@@ -73,6 +71,11 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
     float const logo_h_offset = ( logo_texture != nullptr && logo_texture->m_loaded ) ? 100.0f : 0.0f;
     float const base_start_y = ( logo_h_offset > 0.0f ) ? ( panel_pos.y + logo_h_offset ) : ( panel_pos.y + 20.0f );
 
+    float const scroll_clip_min_y = base_start_y + 4.0f;
+    float const scroll_clip_max_y = panel_pos.y + panel_h - 16.0f;
+
+    draw_list->PushClipRect( ImVec2( p_panel_min.x, scroll_clip_min_y ), ImVec2( p_panel_max.x, scroll_clip_max_y ), true );
+
     float const cat_header_h = 38.0f;
     float const item_h = 54.0f;
     float const item_spacing = 3.0f;
@@ -95,7 +98,7 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
     bool const is_panel_hovered = ( mouse_pos.x >= p_panel_min.x && mouse_pos.x <= p_panel_min.x + panel_w &&
                                     mouse_pos.y >= p_panel_min.y && mouse_pos.y <= p_panel_min.y + panel_h );
 
-    float const max_visible_h = panel_h - ( logo_h_offset > 0.0f ? logo_h_offset : 20.0f ) - 15.0f;
+    float const max_visible_h = scroll_clip_max_y - scroll_clip_min_y;
     float const max_scroll = std::max( 0.0f, total_content_h - max_visible_h );
 
     if ( is_panel_hovered && can_interact && io.MouseWheel != 0.0f && max_scroll > 0.0f )
@@ -223,6 +226,27 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
         }
 
         current_y += cat_spacing;
+    }
+
+    // Render smooth top and bottom vertical gradient fade overlays (#161616 panel background)
+    if ( a_255 > 0 )
+    {
+        ImU32 const bg_full = IM_COL32( 0x16, 0x16, 0x16, a_255 );
+        ImU32 const bg_zero = IM_COL32( 0x16, 0x16, 0x16, 0 );
+
+        // Top fade-in gradient overlay
+        draw_list->AddRectFilledMultiColor(
+            ImVec2( p_panel_min.x, scroll_clip_min_y ),
+            ImVec2( p_panel_max.x, scroll_clip_min_y + 22.0f ),
+            bg_full, bg_full, bg_zero, bg_zero
+        );
+
+        // Bottom fade-out gradient overlay
+        draw_list->AddRectFilledMultiColor(
+            ImVec2( p_panel_min.x, scroll_clip_max_y - 22.0f ),
+            ImVec2( p_panel_max.x, scroll_clip_max_y ),
+            bg_zero, bg_zero, bg_full, bg_full
+        );
     }
 
     draw_list->PopClipRect( );
