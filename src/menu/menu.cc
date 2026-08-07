@@ -189,15 +189,17 @@ void c_menu::draw_foreground( ImFont* font_medium_32, float const delta_time )
     // Render Logo with smooth position slide & gradient color transition
     if ( m_logo_texture.m_loaded )
     {
-        float const tab_w = 225.0f;
-        float const logo_w = 68.0f;
-        float const logo_h = 44.0f;
+        float const collapse_val = g_tabs.m_anim_collapse.m_value;
+        float const curr_panel_w = g_tabs.m_current_panel_w;
+
+        float const logo_w = lerp_f( 68.0f, 42.0f, collapse_val );
+        float const logo_h = lerp_f( 44.0f, 27.0f, collapse_val );
 
         float const start_logo_x = m_pos.x + 31.0f;
         float const start_logo_y = m_pos.y + 41.0f;
 
-        float const end_logo_x = panel_x + 20.0f + ( tab_w - logo_w ) * 0.5f;
-        float const end_logo_y = m_pos.y + 37.0f;
+        float const end_logo_x = panel_x + ( curr_panel_w - logo_w ) * 0.5f;
+        float const end_logo_y = m_pos.y + lerp_f( 37.0f, 28.0f, collapse_val );
 
         float const curr_logo_x = lerp_f( start_logo_x, end_logo_x, ease_t );
         float const curr_logo_y = lerp_f( start_logo_y, end_logo_y, ease_t );

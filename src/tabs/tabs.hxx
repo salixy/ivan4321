@@ -25,6 +25,11 @@ struct c_tabs
     int         m_active_tab = -1; // Closed by default!
     int         m_active_sub_tab[ k_tab_count ] = { 0, 0, 0, 0, 0, 0 };
 
+    bool        m_collapsed = false;
+    animation_t m_anim_collapse;
+    animation_t m_anim_toggle_hover;
+    float       m_current_panel_w = 275.0f;
+
     animation_t m_anim_tab_hover[ k_tab_count ];
     animation_t m_anim_tab_active[ k_tab_count ];
     animation_t m_anim_sub_expand[ k_tab_count ];

@@ -62,24 +62,68 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
         { "Configs",  2, { { "Manager", "\xef\x81\xbc" }, { "Transfer", "\xef\x85\x8d" } } }
     };
 
-    float const item_slide_x = ( 1.0f - alpha ) * 35.0f;
-    float const item_x = panel_pos.x + 20.0f + item_slide_x;
-    float const item_pad_x = 18.0f;
-    float const cat_x = item_x + item_pad_x;
-    float const item_w = 235.0f;
+    // Update smooth collapse animation state
+    m_anim_collapse.m_speed = 14.0f;
+    m_anim_collapse.set( m_collapsed ? 1.0f : 0.0f );
+    m_anim_collapse.update( delta_time );
+    float const collapse_t = m_anim_collapse.m_value;
 
-    float const logo_h_offset = ( logo_texture != nullptr && logo_texture->m_loaded ) ? 100.0f : 0.0f;
+    m_current_panel_w = lerp_f( panel_w, 78.0f * ( panel_w / 275.0f ), collapse_t );
+
+    // Render Collapse / Expand Toggle Button in panel header
+    if ( can_interact && alpha > 0.5f )
+    {
+        ImVec2 const toggle_sz = ImVec2( 22.0f, 22.0f );
+        float const toggle_x = lerp_f( panel_pos.x + m_current_panel_w - 32.0f, panel_pos.x + ( m_current_panel_w - toggle_sz.x ) * 0.5f, collapse_t );
+        float const toggle_y = panel_pos.y + lerp_f( 22.0f, 65.0f, collapse_t );
+        ImVec2 const toggle_min = ImVec2( toggle_x, toggle_y );
+        ImVec2 const toggle_max = ImVec2( toggle_min.x + toggle_sz.x, toggle_min.y + toggle_sz.y );
+
+        bool const is_t_hovered = ( mouse_pos.x >= toggle_min.x && mouse_pos.x <= toggle_max.x &&
+                                    mouse_pos.y >= toggle_min.y && mouse_pos.y <= toggle_max.y );
+
+        m_anim_toggle_hover.m_speed = 16.0f;
+        m_anim_toggle_hover.set( is_t_hovered ? 1.0f : 0.0f );
+        m_anim_toggle_hover.update( delta_time );
+
+        float const t_h_val = m_anim_toggle_hover.m_value;
+        int const t_bg_a = ( int )( lerp_f( 20.0f, 60.0f, t_h_val ) * alpha );
+        int const t_txt_a = ( int )( lerp_f( 140.0f, 255.0f, t_h_val ) * alpha );
+
+        draw_list->AddRectFilled( toggle_min, toggle_max, IM_COL32( 255, 255, 255, t_bg_a ), 6.0f );
+
+        char const* toggle_icon = m_collapsed ? "\xef\x81\x94" : "\xef\x81\x93"; // fa-chevron-right / fa-chevron-left
+        if ( icon_font != nullptr )
+        {
+            ImVec2 const t_icon_sz = icon_font->CalcTextSizeA( 13.0f, FLT_MAX, 0.0f, toggle_icon );
+            ImVec2 const t_icon_pos = ImVec2( toggle_min.x + ( toggle_sz.x - t_icon_sz.x ) * 0.5f, toggle_min.y + ( toggle_sz.y - t_icon_sz.y ) * 0.5f );
+            draw_list->AddText( icon_font, 13.0f, t_icon_pos, IM_COL32( 200, 200, 220, t_txt_a ), toggle_icon );
+        }
+
+        if ( is_t_hovered && io.MouseClicked[ 0 ] )
+        {
+            m_collapsed = !m_collapsed;
+        }
+    }
+
+    float const item_slide_x = ( 1.0f - alpha ) * 35.0f;
+    float const item_w = lerp_f( 235.0f, 50.0f, collapse_t );
+    float const item_x = lerp_f( panel_pos.x + 20.0f + item_slide_x, panel_pos.x + ( m_current_panel_w - item_w ) * 0.5f, collapse_t );
+    float const item_pad_x = lerp_f( 18.0f, 0.0f, collapse_t );
+    float const cat_x = item_x + 18.0f;
+
+    float const logo_h_offset = ( logo_texture != nullptr && logo_texture->m_loaded ) ? lerp_f( 100.0f, 95.0f, collapse_t ) : 0.0f;
     float const base_start_y = ( logo_h_offset > 0.0f ) ? ( panel_pos.y + logo_h_offset ) : ( panel_pos.y + 20.0f );
 
     float const scroll_clip_min_y = base_start_y + 4.0f;
     float const scroll_clip_max_y = panel_pos.y + panel_h - 16.0f;
 
-    draw_list->PushClipRect( ImVec2( p_panel_min.x, scroll_clip_min_y ), ImVec2( p_panel_max.x, scroll_clip_max_y ), true );
+    draw_list->PushClipRect( ImVec2( p_panel_min.x, scroll_clip_min_y ), ImVec2( p_panel_min.x + m_current_panel_w + 120.0f, scroll_clip_max_y ), false );
 
-    float const cat_header_h = 38.0f;
+    float const cat_header_h = lerp_f( 38.0f, 16.0f, collapse_t );
     float const item_h = 54.0f;
     float const item_spacing = 3.0f;
-    float const cat_spacing = 14.0f;
+    float const cat_spacing = lerp_f( 14.0f, 8.0f, collapse_t );
 
     // Default to first tab (Combat -> Aim) if no tab is selected
     if ( m_active_tab < 0 || m_active_tab >= k_tab_count )
@@ -95,7 +139,7 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
         total_content_h += cat_header_h + categories[ i ].m_item_count * ( item_h + item_spacing ) + cat_spacing;
     }
 
-    bool const is_panel_hovered = ( mouse_pos.x >= p_panel_min.x && mouse_pos.x <= p_panel_min.x + panel_w &&
+    bool const is_panel_hovered = ( mouse_pos.x >= p_panel_min.x && mouse_pos.x <= p_panel_min.x + m_current_panel_w &&
                                     mouse_pos.y >= p_panel_min.y && mouse_pos.y <= p_panel_min.y + panel_h );
 
     float const max_visible_h = scroll_clip_max_y - scroll_clip_min_y;
@@ -160,15 +204,18 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
 
     for ( int i = 0; i < k_tab_count; ++i )
     {
-        // Render Category Header (Darker text description without icon)
-        ImVec2 const cat_min = ImVec2( cat_x, current_y );
-        ImU32 const title_col = IM_COL32( 62, 58, 70, ( int )( 170.0f * alpha ) );
-
-        if ( font_medium_32 != nullptr )
+        // Render Category Header (fade out text when collapsing)
+        if ( font_medium_32 != nullptr && collapse_t < 0.90f )
         {
-            std::string const upper_name = to_upper( categories[ i ].m_name );
-            ImVec2 const text_pos = ImVec2( cat_min.x, cat_min.y + ( cat_header_h - 25.0f ) * 0.5f );
-            draw_list->AddText( font_medium_32, 25.0f, text_pos, title_col, upper_name.c_str( ) );
+            ImVec2 const cat_min = ImVec2( cat_x, current_y );
+            int const cat_alpha_val = ( int )( ( 1.0f - collapse_t ) * 170.0f * alpha );
+            if ( cat_alpha_val > 0 )
+            {
+                ImU32 const title_col = IM_COL32( 62, 58, 70, cat_alpha_val );
+                std::string const upper_name = to_upper( categories[ i ].m_name );
+                ImVec2 const text_pos = ImVec2( cat_min.x, cat_min.y + ( cat_header_h - 25.0f ) * 0.5f );
+                draw_list->AddText( font_medium_32, 25.0f, text_pos, title_col, upper_name.c_str( ) );
+            }
         }
 
         current_y += cat_header_h;
@@ -195,8 +242,8 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
                 int const bg_alpha = ( int )( lerp_f( 0.0f, 5.0f, h_val ) * alpha );
                 int const border_alpha = ( int )( lerp_f( 0.0f, 8.0f, h_val ) * alpha );
 
-                draw_list->AddRectFilled( item_min, item_max, IM_COL32( 255, 255, 255, bg_alpha ), 12.0f );
-                draw_list->AddRect( item_min, item_max, IM_COL32( 255, 255, 255, border_alpha ), 12.0f, 0, 1.0f );
+                draw_list->AddRectFilled( item_min, item_max, IM_COL32( 255, 255, 255, bg_alpha ), lerp_f( 12.0f, 14.0f, collapse_t ) );
+                draw_list->AddRect( item_min, item_max, IM_COL32( 255, 255, 255, border_alpha ), lerp_f( 12.0f, 14.0f, collapse_t ), 0, 1.0f );
             }
 
             // Text & icon color transition from inactive (110, 110, 125) to active accent (158, 149, 217)
@@ -211,15 +258,39 @@ void c_tabs::render( ImVec2 const& panel_pos, float const panel_w, float const p
             {
                 ImVec2 const icon_sz = icon_font->CalcTextSizeA( 18.0f, FLT_MAX, 0.0f, categories[ i ].m_items[ j ].m_icon );
                 icon_w = icon_sz.x;
-                ImVec2 const icon_pos = ImVec2( item_min.x + item_pad_x, item_min.y + ( item_h - icon_sz.y ) * 0.5f );
+                float const icon_x_pos = lerp_f( item_min.x + 18.0f, item_min.x + ( item_w - icon_sz.x ) * 0.5f, collapse_t );
+                ImVec2 const icon_pos = ImVec2( icon_x_pos, item_min.y + ( item_h - icon_sz.y ) * 0.5f );
                 draw_list->AddText( icon_font, 18.0f, icon_pos, item_col, categories[ i ].m_items[ j ].m_icon );
             }
 
-            if ( font_medium_32 != nullptr )
+            // Subtab label text (fades out as panel collapses)
+            if ( font_medium_32 != nullptr && collapse_t < 0.95f )
             {
-                float const text_x_offset = item_pad_x + icon_w + ( icon_w > 0.0f ? item_pad_x : 0.0f );
-                ImVec2 const text_pos = ImVec2( item_min.x + text_x_offset, item_min.y + ( item_h - 25.0f ) * 0.5f );
-                draw_list->AddText( font_medium_32, 25.0f, text_pos, item_col, categories[ i ].m_items[ j ].m_name );
+                int const text_a = ( int )( ( 1.0f - collapse_t ) * ( float )a_255 );
+                if ( text_a > 0 )
+                {
+                    ImU32 const label_col = IM_COL32( ( int )r_txt, ( int )g_txt, ( int )b_txt, text_a );
+                    float const text_x_offset = 18.0f + icon_w + ( icon_w > 0.0f ? 18.0f : 0.0f );
+                    ImVec2 const text_pos = ImVec2( item_min.x + text_x_offset, item_min.y + ( item_h - 25.0f ) * 0.5f );
+                    draw_list->AddText( font_medium_32, 25.0f, text_pos, label_col, categories[ i ].m_items[ j ].m_name );
+                }
+            }
+
+            // Stylish floating Tooltip when collapsed and hovered
+            if ( collapse_t > 0.4f && is_hovered && font_medium_32 != nullptr )
+            {
+                char const* item_label = categories[ i ].m_items[ j ].m_name;
+                ImVec2 const txt_sz = font_medium_32->CalcTextSizeA( 20.0f, FLT_MAX, 0.0f, item_label );
+                ImVec2 const tt_sz = ImVec2( txt_sz.x + 24.0f, 32.0f );
+                ImVec2 const tt_min = ImVec2( item_max.x + 10.0f, item_min.y + ( item_h - tt_sz.y ) * 0.5f );
+                ImVec2 const tt_max = ImVec2( tt_min.x + tt_sz.x, tt_min.y + tt_sz.y );
+
+                int const tt_alpha = ( int )( ( collapse_t - 0.4f ) / 0.6f * ( float )a_255 );
+                draw_list->AddRectFilled( tt_min, tt_max, IM_COL32( 28, 26, 36, tt_alpha ), 8.0f );
+                draw_list->AddRect( tt_min, tt_max, IM_COL32( 158, 149, 217, ( int )( 0.6f * ( float )tt_alpha ) ), 8.0f, 0, 1.0f );
+
+                ImVec2 const tt_txt_pos = ImVec2( tt_min.x + 12.0f, tt_min.y + ( tt_sz.y - 20.0f ) * 0.5f );
+                draw_list->AddText( font_medium_32, 20.0f, tt_txt_pos, IM_COL32( 240, 240, 250, tt_alpha ), item_label );
             }
 
             current_y += item_h + item_spacing;
